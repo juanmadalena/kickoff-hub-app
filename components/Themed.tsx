@@ -1,12 +1,6 @@
-/**
- * Learn more about Light and Dark modes:
- * https://docs.expo.io/guides/color-schemes/
- */
-
-import { Text as DefaultText, View as DefaultView } from 'react-native';
+import { Text as DefaultText, View as DefaultView, useColorScheme, TextInput as DefaultTextInput } from 'react-native';
 
 import Colors from '@/constants/Colors';
-import { useColorScheme } from '../hooks/useColorScheme';
 
 type ThemeProps = {
   lightColor?: string;
@@ -15,6 +9,7 @@ type ThemeProps = {
 
 export type TextProps = ThemeProps & DefaultText['props'];
 export type ViewProps = ThemeProps & DefaultView['props'];
+export type TextInputProps = ThemeProps & DefaultTextInput['props'];
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
@@ -43,3 +38,25 @@ export function View(props: ViewProps) {
 
   return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;
 }
+
+export function TextInput(props: TextInputProps) {
+  const { style, lightColor, darkColor, ...otherProps } = props;
+  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const borderColor = useThemeColor({ light: lightColor, dark: darkColor },'selectionBackground');
+  return <DefaultTextInput style={[{ color, borderColor, borderWidth:1, borderRadius: 5, height: 50, padding:10, fontSize:16 }, style]} {...otherProps} />;
+}
+
+{/* <TextInput 
+placeholder="Email or username" 
+keyboardType='email-address'
+autoCapitalize='none'
+onChangeText={ (value) => onChange(value, 'email') }
+value={ email }
+autoCorrect={false}
+// onSubmitEditing={ () => console.log("submit") }
+onFocus={
+    () => setInputErrors(false)
+}
+style={{ marginBottom: 15, borderWidth: 1,
+borderRadius: 5, height: 45, paddingHorizontal: 10, borderColor: inputErrors ? 'red': 'black'}}
+/> */}

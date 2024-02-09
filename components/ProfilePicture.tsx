@@ -1,4 +1,5 @@
-import { View, Image, StyleSheet } from 'react-native';
+import { Image, StyleSheet } from 'react-native';
+import { View } from './Themed';
 
 interface Props {
     uri: string;
@@ -6,7 +7,7 @@ interface Props {
     width?: number;
 }
 
-const ProfilePicture = ({ uri, height = 80, width = 80 }: Props) => {
+const ProfilePicture = ({ uri, height = 60, width = 60 }: Props) => {
     return (
         <View style={{height, width}}>
             <Image
