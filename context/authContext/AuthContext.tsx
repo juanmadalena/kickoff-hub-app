@@ -1,18 +1,20 @@
-import { createContext, useEffect, useReducer, useState } from "react";
+import { createContext, useEffect, useReducer } from "react";
 import * as SecureStore from 'expo-secure-store';
 
 import { api } from "@/api/api";
 import { AuthState, authReducer } from "./authReducer";
-import { LoginData, LoginResponse, RegisterData, User } from "@/interfaces/interfaces";
+import { ErrorResponse, LoginData, LoginResponse, RegisterData, User } from "@/interfaces/interfaces";
 
 interface AuthContextType {
-    error: object | null,
+    error: ErrorResponse | null,
     token: string | null,
     user: User | null,
     status: 'checking' | 'authenticated' | 'not-authenticated',
     register: (userData: any) => void,
     login: (data: LoginData) => void,
     logout: () => void,
+    removeError: () => void
+
 } 
 
 const initialState: AuthState = {
@@ -50,16 +52,16 @@ export const AuthProvider = ({ children }:any) => {
             SecureStore.setItemAsync('token', data.token);
         }
         catch(err){
-            console.error(err);
             
             dispatch({ type: 'notAuthenticated' });
             SecureStore.deleteItemAsync('token');
         }
     }
 
-    const register = async ({ username, email, firstName, lastName, password, position }: RegisterData) => {
+    const register = async ({ email, firstName, lastName, password, position }: RegisterData) => {
         try{
-            const { data } = await api.post<LoginResponse>('/auth/register', { username, email, firstName, lastName, password, position });
+            console.log({ email, firstName, lastName, password, position })
+            const { data } = await api.post<LoginResponse>('/auth/register', { email, firstName, lastName, password, position });
 
             dispatch({
                 type: 'register',
@@ -72,35 +74,51 @@ export const AuthProvider = ({ children }:any) => {
             SecureStore.setItemAsync('token', data.token);
         }
         catch(err: any){
+            if(err.isAxiosError){
+                return dispatch({
+                    type: 'addError',
+                    payload: err.response.data
+                })
+            }
             dispatch({
                 type: 'addError',
-                payload: err.response.data || 'Información incorrecta'
+                payload: {message: 'Something went wrong. Please try again.'}
             })
         }
     }
-    const login = async ({ username, password }: LoginData) => {
+    const login = async ({ email, password }: LoginData) => {
         try{
-            const { data } = await api.post<LoginResponse>('/auth/login', { username, password });
+            const { data } = await api.post<LoginResponse>('/auth/login', { email, password });
 
-            dispatch({
+            SecureStore.setItemAsync('token', data.token);
+            
+            return dispatch({
                 type: 'login',
                 payload: {
                     token: data.token,
                     user: data.user,
                 }
             })
-
-            SecureStore.setItemAsync('token', data.token);
-
+            
         }
         catch(err: any){
-            console.log(err);
+            if(err.isAxiosError){
+                return dispatch({
+                    type: 'addError',
+                    payload: err.response.data
+                })
+            }
             dispatch({
                 type: 'addError',
-                payload: err || 'Información incorrecta'
+                payload: {message: 'Something went wrong. Please try again.'}
             })
         }
     }
+
+    const removeError = () => {
+        dispatch({ type: 'removeError' });
+    }
+
     const logout = () => {
         SecureStore.deleteItemAsync('token');
         dispatch({ type: 'logout' });
@@ -112,7 +130,8 @@ export const AuthProvider = ({ children }:any) => {
             ...state,
             register,
             login,
-            logout
+            logout,
+            removeError
         }}>
             {children}
         </AuthContext.Provider>

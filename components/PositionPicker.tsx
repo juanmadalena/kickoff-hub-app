@@ -1,7 +1,8 @@
 import { Image, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { useEffect, useState } from 'react';
 
-import { Text, View } from './Themed';
+import { Text, View, Button } from './Themed';
+import { commonStyles } from '@/styles/authStyle';
 
 const PositionPicker = ({ onSelectPosition, position } : any) => {
 
@@ -10,7 +11,7 @@ const PositionPicker = ({ onSelectPosition, position } : any) => {
 
     useEffect(() => {
         Animated.timing(scaleAnimation, {
-            toValue: 1.3,
+            toValue: 1.1,
             duration: 300,
             useNativeDriver: true,
         }).start();
@@ -33,33 +34,15 @@ const PositionPicker = ({ onSelectPosition, position } : any) => {
 
     const selectedStyles = {
         transform: [{ scale: scaleAnimation }],
-        shadowColor: '#000',
-        shadowOffset: {
-        width: 0,
-        height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-        borderWidth: 1.5,
         borderRadius: 8,
-        borderColor: 'teal',
-        ...styles.animationConatiner
+        backgroundColor: 'rgba(0,0,0,0.04)',
+        ...styles.animationContainer
     }
 
     return (
-        <View style={{flex:1}}>
-            <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-                <Text style={{textAlign:'left', fontSize: 20, fontWeight: '500'}}>Select your position</Text>
-                {
-                    positionSelected && (
-                        <TouchableOpacity 
-                            onPress={close}
-                        >
-                            <Text style={{fontSize: 18, color: 'teal'}}>Done</Text>
-                        </TouchableOpacity>
-                    )
-                }
+        <View style={{flex:1, justifyContent:'space-between', flexDirection:'column'}}>
+            <View style={{flexDirection:'row', alignItems:'center', marginVertical:10}}>
+                <Text style={{fontSize: 20, fontWeight: '500'}}>Select your position</Text>
             </View>
             <View style={styles.container}>
                 {
@@ -70,15 +53,24 @@ const PositionPicker = ({ onSelectPosition, position } : any) => {
                             activeOpacity={0.7}    
                             onPress={ () => handleSelection(pos.value)}
                         >
-                            <Animated.View style={ positionSelected === pos.value ? selectedStyles : styles.animationConatiner }>
+                            <Animated.View style={ positionSelected === pos.value ? selectedStyles : styles.animationContainer }>
                                 <Image
                                     source={pos.image}
                                     style={styles.positionImage}
                                 />
-                                <Text style={styles.positionText}>{pos.value}</Text>
+                                <Text style={styles.positionText}>{pos.name}</Text>
                             </Animated.View>
                         </TouchableOpacity>
                     ))
+                }
+            </View>
+            <View style={styles.buttonContainer}>
+                {
+                    positionSelected && (
+                        <Button style={{width:'35%', height:40, padding:5}} onPress={close}>
+                            <Text style={commonStyles.buttonText}> Done </Text>
+                        </Button>
+                    )
                 }
             </View>
         </View>
@@ -90,11 +82,13 @@ const styles = StyleSheet.create({
     container:{
         flex:1,
         flexDirection: 'row',
-        alignItems: 'center',
+        alignContent: 'center',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
     },
     positionContainer:{
-        height:'65%',
-        width:'25%',
+        height:'48%',
+        width:'48%',
         padding:10,
         justifyContent:'space-around',
         borderRadius: 10,   
@@ -110,21 +104,26 @@ const styles = StyleSheet.create({
 
         elevation: 5,
     },
-    animationConatiner:{
+    animationContainer:{
         flex:1,
         justifyContent: 'center',
         alignItems: 'center',
     },
     positionImage:{
-        height: '50%',
+        height: '60%',
         width: '100%',
         objectFit: 'contain'
     },
     positionText:{
         textAlign: 'center',
-        fontSize:18,
+        fontSize:14,
         fontWeight: '400'
-    }
+    },
+    buttonContainer:{
+        height: 60,
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+    },
 });
 
 

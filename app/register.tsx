@@ -1,156 +1,223 @@
-import BottomModal from '@/components/BottomModal';
-import PositionPicker from '@/components/PositionPicker';
-import { View, Text, TextInput } from '@/components/Themed';
-import { AuthContext } from '@/context/authContext/AuthContext';
-import { useForm } from '@/hooks/useForm';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { KeyboardAvoidingView, Platform, StyleSheet, Animated, TextInput as DefaultTexInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useContext, useEffect, useState } from 'react';
-import { Button, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+
+import BottomModal from '@/components/BottomModal';
+import LogoImage from '@/components/LogoImage';
+import PositionPicker from '@/components/PositionPicker';
+import { View, Text, TextInput, Button } from '@/components/Themed';
+import { AuthContext } from '@/context/authContext/AuthContext';
+import { useFade } from '@/hooks/useFade';
+import { useForm } from '@/hooks/useForm';
+import useKeyboardActive from '@/hooks/useKeyboardActive';
+import { commonStyles } from '@/styles/authStyle'
+
+interface RegisterForm {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    position: string;
+}
 
 const register = () => {
 
-    const { register, status, error } = useContext(AuthContext);
-    const [ showModal, setShowModal ] = useState(false)
+    // Refs
+    const lastNameRef = useRef<DefaultTexInput | null>(null)
+    const emailRef = useRef<DefaultTexInput | null>(null)
+    const passwordRef = useRef<DefaultTexInput | null>(null)
+    const positionRef = useRef<DefaultTexInput | null>(null)
 
-    const { firstName, lastName, username, position, email, password, onChange } = useForm({
+    const { register, status, error, removeError } = useContext(AuthContext);
+    const [ showModal, setShowModal ] = useState(false);
+    const [ loading, setLoading ] = useState(false);
+
+    const { fadeIn, fadeOut, opacity } = useFade();
+
+    const { firstName, lastName, position, email, password, onChange } = useForm<RegisterForm>({
         firstName: 'juan',
         lastName: 'madalena',
-        username:'juanmadalena443',
-        email: 'juanmadlena2e4@gmail.com',
-        password: '12345678',
+        email: 'juanmadalena',
+        password: '1234',
         position: 'GK',
-    })
+    });
+
 
     const router = useRouter();
 
-    const handleRegister = async () => {
-        register({ firstName, lastName, username, email, password, position });
-        if(status === 'authenticated'){
-        }
+    const { keyboardActive } = useKeyboardActive();
+
+    const handleRegister = async () => { 
+        Keyboard.dismiss();
+        register({ firstName, lastName, email, password, position });
     }
 
     useEffect(() => {
+        removeError();
+        fadeIn(300);
+    }, [])
+
+    useEffect(() => {
         if(status === 'authenticated'){
-            router.navigate('/(app)/');
+            fadeOut(300, () => router.replace('/(app)/'))
         }
     }, [status])
 
+    const modalHandler = () => {
+        Keyboard.dismiss();
+        setShowModal(!showModal);
+    }
 
     const handleSelection = ( value: string ) => {
         onChange(value, 'position');
         setShowModal(false);
     }
 
+    const navigateToLogin = () => { 
+        fadeOut(100, () => router.replace('/login'))
+    }
+
     return (
-        <View style={{flex:1}}>
-            <KeyboardAvoidingView
-                style={{flex:1}}
-                behavior={ (Platform.OS === 'ios') ? 'padding': 'height' }
-            >
-                <View style={styles.formContainer}>
-                    {/* <Text style={styles.label}>USername or Email</Text> */}
-                    <TextInput
-                        placeholder="First Name"
-                        underlineColorAndroid="white"
-                        autoCapitalize="none"
-                        autoCorrect={ false }
-                        onFocus={ () => console.log("focus")}
-                        style={styles.inputField}
-                        value={firstName}
-                    />
+        <>
+        {/* Logo */}
+        <LogoImage />
+        <KeyboardAvoidingView style={{flex: 1, paddingHorizontal:20}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={180}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} >
+                    <Animated.View style={{ ...commonStyles.innerContainer ,opacity }}>
+                        {/* Title */}   
+                        <View style={commonStyles.titleContainer}>
+                            <Text style={commonStyles.title}>Create an account</Text>
+                            {
+                                !keyboardActive && <Text style={commonStyles.subtitle}>Please fill the form to create an account</Text>
+                            }
+                        </View>
 
-                    <TextInput
-                        placeholder="Last Name" 
-                        underlineColorAndroid="white"
-                        autoCapitalize="none"
-                        autoCorrect={ false }
-                        onFocus={ () => console.log("focus") }
-                        style={styles.inputField}
-                        value={lastName}
-                    />
+                        {/* Form */}
+                        <View style={commonStyles.formContainer}>
 
-                    <TextInput
-                        placeholder="Username"
-                        underlineColorAndroid="white"
-                        autoCapitalize="none"
-                        autoCorrect={ false }
-                        onFocus={ () => console.log("focus") }
-                        style={[styles.inputField, error?.input === 'username' && { borderColor: 'red' }]}
-                        value={username}
-                    />
+                            <View style={styles.nameContainer}>
+                                <TextInput
+                                    placeholder="First Name"
+                                    autoCapitalize="words"
+                                    style={[styles.nameField]}
+                                    value={firstName}
+                                    onChangeText={ (value) => onChange(value, 'firstName')}
+                                    enterKeyHint='next'
+                                    autoComplete='name'
+                                    error={error?.input === 'firstName'}
+                                    onSubmitEditing={ () => lastNameRef.current && lastNameRef.current.focus()}
+                                />
 
-                    <TextInput
-                        placeholder="Email"
-                        keyboardType="email-address"
-                        underlineColorAndroid="white"
-                        autoCapitalize="none"
-                        autoCorrect={ false }
-                        onFocus={ () => console.log("focus") }
-                        style={[styles.inputField, error?.input === 'email' && { borderColor: 'red' }]}
-                        value={email}
-                    />
+                                <TextInput
+                                    innerRef={lastNameRef}
+                                    id='lastName'
+                                    autoComplete='family-name'
+                                    placeholder="Last Name" 
+                                    autoCapitalize="words"
+                                    style={[styles.nameField]}
+                                    value={lastName}
+                                    onChangeText={ (value) => onChange(value, 'lastName')}
+                                    enterKeyHint='next'
+                                    error={error?.input === 'lastName'}
+                                    onSubmitEditing={ () => emailRef.current && emailRef.current.focus()}
+                                />
+                            </View>
 
-                    <TextInput
-                        placeholder="Password"
-                        keyboardType="visible-password"
-                        secureTextEntry={true}
-                        underlineColorAndroid="white"
-                        autoCapitalize="none"
-                        autoCorrect={ false }
-                        onFocus={ () => console.log("focus") }
-                        style={[styles.inputField, error?.input === 'password' && { borderColor: 'red' }]}
-                        value={password}
-                    />
 
-                    <TextInput
-                        placeholder="Position"
-                        keyboardType="default"
-                        autoCapitalize="none"
-                        value={position}
-                        editable={false}
-                        autoCorrect={ false }
-                        onTouchStart={ () => setShowModal(true) }
-                        onFocus={ () => console.log("Abrir modal de posiciones") }
-                        style={styles.inputField}
-                    />
-                    <View style={styles.inputField}>
-                        <BottomModal 
-                            transparent={true}
-                            visible={showModal}
-                            animationType='fade'
-                        >
-                            <PositionPicker
-                                style={{flex:1}} 
-                                position={position}
-                                onSelectPosition={handleSelection}
+                            <TextInput
+                                placeholder="Email"
+                                autoComplete='email'
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                autoCorrect={ false }
+                                spellCheck={false}
+                                style={[ error?.input === 'email' && { borderColor: 'red' }]}
+                                value={email}
+                                onChangeText={ (value) => onChange(value, 'email')}
+                                enterKeyHint='next'
+                                innerRef={emailRef}
+                                error={error?.input === 'email'}
+                                onSubmitEditing={ () => passwordRef.current && passwordRef.current.focus()}
                             />
-                        </BottomModal>
-                    </View>
-                    <Text style={{color:'red'}}>{status}</Text>
-                    <Text style={{color:'red'}}>{JSON.stringify(error)}</Text>
-                    <Button title="Register" onPress={handleRegister} />
+                    
+                            <TextInput
+                                placeholder="Password"
+                                autoComplete='password'
+                                keyboardType="visible-password"
+                                secureTextEntry={true}
+                                autoCapitalize="none"
+                                autoCorrect={ false }
+                                style={[ error?.input === 'password' && { borderColor: 'red' }]}
+                                value={password}
+                                onChangeText={ (value) => onChange(value, 'password')}
+                                innerRef={passwordRef}
+                                enterKeyHint='next'
+                                error={error?.input === 'password'}
+                                onSubmitEditing={modalHandler}
+                            />
 
-                </View>
+                            <TextInput
+                                placeholder="Position"
+                                keyboardType="default"
+                                autoCapitalize="none"
+                                value={position}
+                                editable={false}
+                                autoCorrect={ false }
+                                onTouchStart={modalHandler}
+                                error={error?.input === 'position'}
+                                innerRef={positionRef}
+                            />
 
-            </KeyboardAvoidingView>
-            <Text style={{textAlign:'center'}}>Already have an account?</Text>
-            <Button title="Login" onPress={() => router.replace('/login')} />
-        </View>
+                            <View>
+                                <BottomModal 
+                                    transparent={true}
+                                    visible={showModal}
+                                    animationType='fade'
+                                    modalHeight={'50%'}
+                                >
+                                    <PositionPicker
+                                        style={{flex:1}} 
+                                        position={position}
+                                        onSelectPosition={handleSelection}
+                                    />
+                                </BottomModal>
+                            </View>
+
+                            {/* Button to submit */}
+                            <Button loading={loading} onPress={handleRegister} disabled={loading}>
+                                <Text style={commonStyles.buttonText}>Create account</Text>
+                            </Button>
+                        </View>
+
+                        {/* <View></View> */}
+                    </Animated.View>
+            </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+        <Text style={{color:'red', textAlign:'center', marginTop:20}}>{error?.message ?? ' '}</Text>
+        {/* Link to login */}
+        {
+            // Hide link when keyboard is active, because it cause some problems on android
+            !keyboardActive && (
+                <Animated.View style={{opacity}}>
+                    <Text style={{textAlign: 'center', color: 'grey', fontSize: 16}}>Already have an account? <Text style={{color: '#005B41', fontWeight: '600'}} onPress={navigateToLogin}>Login</Text></Text>
+                </Animated.View>
+            )
+        }
+        </>
     );
 };
 
 
 const styles = StyleSheet.create({
-    formContainer: {
-        flex: 1,
-        paddingHorizontal: 30,
-        justifyContent:'center',
-        height: '100%',
-        marginBottom: 50
+    nameField: {
+        minWidth: 160,
+        width: '48%',
     },
-    inputField: {
-        marginBottom: 15,
-        borderColor: 'grey',
+    nameContainer: {
+        backgroundColor: 'transparent',
+        flexWrap: 'wrap',
+        flexDirection: 'row',
+        justifyContent: 'space-between'
     },
 });
 

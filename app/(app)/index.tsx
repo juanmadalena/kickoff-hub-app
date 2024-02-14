@@ -1,13 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
 import { Button, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
 import { View, Text } from '@/components/Themed';
-import ProfilePicture from '@/components/ProfilePicture';
 import DatePicker from '@/components/DatePicker';
 import MatchItem from '@/components/MatchItem';
-import Icon from '@/components/Icon';
 import { AuthContext } from '@/context/authContext/AuthContext';
 import { api } from '@/api/api';
+import { router } from 'expo-router';
+import ProfilePicture from '@/components/ProfilePicture';
+import Icon from '@/components/Icon';
 
 const index = () => {
 
@@ -34,9 +34,11 @@ const index = () => {
         logout()
     }
 
+    const PIC = 'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png'
+
     return (
         <View style={styles.container}>
-            {/* <View style={[styles.topBar, styles.paddingHorizontal]}>
+            <View style={[styles.topBar, styles.paddingHorizontal]}>
                 <View style={{flexDirection: 'row', alignItems: 'center'}}>
                     <TouchableOpacity activeOpacity={0.8} onPress={() => router.push('/')}>
                         <ProfilePicture uri={PIC} />
@@ -45,14 +47,14 @@ const index = () => {
                 <View style={{padding: 6, borderRadius: 30, backgroundColor:'grey'}}>
                     <Icon name='notifications-none' color={'white'} size={24} />
                 </View>
-            </View> */}
+            </View>
             {/* Title */}
             <View style={[styles.paddingHorizontal, styles.titleContainer]}>
                 <Text style={styles.title}>Upcoming </Text>
                 <Text style={styles.title}>Matches</Text>
-                <Text>Welcome: {user?.username}</Text>
+                {/* <Text>Welcome: {user?.username}</Text>
+                <Button title="fetch matches" onPress={fetchMatches} /> */}
                 <Button title="Logout" onPress={handlelogout} />
-                <Button title="fetch matches" onPress={fetchMatches} />
             </View>
             {/* Date picker */}
             <View style={[styles.datePickerContainer, styles.paddingHorizontal]}>

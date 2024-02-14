@@ -10,18 +10,13 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "splash":{
+      "image": "./assets/images/logo-dark.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#005B41"
+    },
     "ios": {
       "supportsTablet": true,
-      "splash": {
-        "image": "./assets/images/splash.jpg",
-        "resizeMode": "contain",
-        "backgroundColor": "#ffffff",
-        "dark": {
-          "image": "./assets/images/splash.jpg",
-          "resizeMode": "contain",
-          "backgroundColor": "#a5b767"
-        }
-      },
       "config": {
         "usesNonExemptEncryption": false
       }
@@ -30,16 +25,6 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "splash": {
-        "image": "./assets/images/splash.jpg",
-        "resizeMode": "contain",
-        "backgroundColor": "#a568b6",
-        "dark": {
-          "image": "./assets/images/splash.jpg",
-          "resizeMode": "contain",
-          "backgroundColor": "#000000"
-        }
       }
     },
     "web": {

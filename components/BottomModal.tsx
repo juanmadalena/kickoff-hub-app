@@ -1,22 +1,21 @@
 import { Modal, StyleSheet, Animated } from 'react-native';
 import { View, useThemeColor } from './Themed';
-import { useEffect, useLayoutEffect } from 'react';
 
 type BottomModalProps = Modal['props'] | {
     visible: boolean;
-    animationOut?: () => void;
     children: React.ReactNode;
+    modalHeight: number | string;
     setVisible: (visible: boolean) => void;
 }
 
 const BottomModal = ( props : BottomModalProps ) => {
     
-    const { children,  ...otherProps } = props;
+    const { children, modalHeight = '35%', ...otherProps } = props as BottomModalProps;
 
     const backgroundColor = useThemeColor({}, 'background');
 
     //Animation for the modal
-    const translateY = new Animated.Value(300);
+    const translateY = new Animated.Value(200);
 
     Animated.timing(translateY, {
         delay: 50,
@@ -28,7 +27,7 @@ const BottomModal = ( props : BottomModalProps ) => {
     return (
         <Modal {...otherProps}>
             <View style={styles.container}>
-                <Animated.View style={{...styles.bottomContainer, backgroundColor, transform: [{translateY:translateY}]}}>
+                <Animated.View style={{...styles.bottomContainer, height: modalHeight ,backgroundColor, transform: [{translateY:translateY}]}}>
                     {children}
                 </Animated.View>
             </View>
@@ -43,8 +42,6 @@ const styles = StyleSheet.create({
     },
     bottomContainer:{
         minHeight: 250,
-        maxHeight: 600,
-        height: '30%',
         padding: 20,
         position: 'absolute',
         bottom: 0,

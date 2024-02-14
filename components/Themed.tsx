@@ -1,4 +1,4 @@
-import { Text as DefaultText, View as DefaultView, useColorScheme, TextInput as DefaultTextInput } from 'react-native';
+import { Text as DefaultText, View as DefaultView, useColorScheme, TextInput as DefaultTextInput, TouchableOpacity as DefaultTouchableOpacity, ActivityIndicator  } from 'react-native';
 
 import Colors from '@/constants/Colors';
 
@@ -9,7 +9,8 @@ type ThemeProps = {
 
 export type TextProps = ThemeProps & DefaultText['props'];
 export type ViewProps = ThemeProps & DefaultView['props'];
-export type TextInputProps = ThemeProps & DefaultTextInput['props'];
+export type TextInputProps = ThemeProps & DefaultTextInput['props'] & { innerRef?: any, error?: boolean};
+export type ButtonProps = ThemeProps & DefaultTouchableOpacity['props'] & { loading?: boolean };;
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
@@ -39,24 +40,26 @@ export function View(props: ViewProps) {
   return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;
 }
 
-export function TextInput(props: TextInputProps) {
-  const { style, lightColor, darkColor, ...otherProps } = props;
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
-  const borderColor = useThemeColor({ light: lightColor, dark: darkColor },'selectionBackground');
-  return <DefaultTextInput style={[{ color, borderColor, borderWidth:1, borderRadius: 5, height: 50, padding:10, fontSize:16 }, style]} {...otherProps} />;
+export function Button(props: ButtonProps ) {
+  const { loading, disabled, lightColor, darkColor, style, ...otherProps } = props;
+  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'primaryColor');
+  const loadingColor = 'rgba(0, 91, 65,0.4)'
+
+  return <DefaultTouchableOpacity disabled={disabled} style={[{borderRadius: 5, height: 50, padding:10, alignItems:'center', justifyContent:'center', backgroundColor: loading ? loadingColor : backgroundColor}, style]} {...otherProps}>
+    {
+      loading ? 
+      <ActivityIndicator color="white"/>
+      :
+      props.children
+    }
+  </DefaultTouchableOpacity>
 }
 
-{/* <TextInput 
-placeholder="Email or username" 
-keyboardType='email-address'
-autoCapitalize='none'
-onChangeText={ (value) => onChange(value, 'email') }
-value={ email }
-autoCorrect={false}
-// onSubmitEditing={ () => console.log("submit") }
-onFocus={
-    () => setInputErrors(false)
+export function TextInput(props: TextInputProps) {
+  const { error, style, lightColor, darkColor, innerRef = null, ...otherProps } = props;
+  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'itemBackground');
+  const errorStyle = error ? {borderColor: 'red', borderWidth:1} : {};
+
+  return <DefaultTextInput ref={innerRef} style={[{ color, backgroundColor, borderRadius: 5, height: 50, padding:10, fontSize:16, marginBottom: 15 }, style, errorStyle]} underlineColorAndroid={'transparent'} placeholderTextColor={'grey'} {...otherProps} />
 }
-style={{ marginBottom: 15, borderWidth: 1,
-borderRadius: 5, height: 45, paddingHorizontal: 10, borderColor: inputErrors ? 'red': 'black'}}
-/> */}

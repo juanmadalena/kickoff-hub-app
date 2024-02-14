@@ -1,7 +1,7 @@
-import { User } from "@/interfaces/interfaces";
+import { ErrorResponse, User } from "@/interfaces/interfaces";
 
 export interface AuthState {
-    error: object | null;
+    error: ErrorResponse | null;
     status: 'checking' | 'authenticated' | 'not-authenticated';
     token: string | null;
     user: User | null;
@@ -9,6 +9,7 @@ export interface AuthState {
 
 export type AuthAction =
     | { type: 'addError', payload: object}
+    | { type: 'removeError' }
     | { type: 'login', payload: { token: string, user: User } }
     | { type: 'register', payload: { token: string, user: User } }
     | { type: 'notAuthenticated' }
@@ -36,7 +37,12 @@ export const authReducer = ( state: AuthState, action: AuthAction ): AuthState =
             return {
                 ...state,
                 status: 'not-authenticated',
-                error: action.payload
+                error: action.payload as ErrorResponse
+            }
+        case 'removeError':
+            return {
+                ...state,
+                error: null
             }
         default:
             return state;

@@ -7,6 +7,7 @@ export default {
     background: '#F2F2F2',
     itemBackground: '#E3E3E3',
     selectionBackground: '#CBCBCB',
+    primaryColor: '#196b54',
     tint: tintColorLight,
     tabIconDefault: '#ccc',
     tabIconSelected: tintColorLight,
@@ -16,6 +17,7 @@ export default {
     background: '#000',
     itemBackground: '#141414',
     selectionBackground: '#2a2a2a',
+    primaryColor: '#005b41',
     tint: tintColorDark,
     tabIconDefault: '#ccc',
     tabIconSelected: tintColorDark,
@@ -32,5 +34,5 @@ teal: #00cc00
 dark teal: #1a3c3f
 purple: #7885ff
 light purple: #b7c8e9
-
+14746F
 */

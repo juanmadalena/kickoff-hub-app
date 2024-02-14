@@ -1,7 +1,8 @@
+import { SafeAreaView, useColorScheme } from 'react-native';
 import { Slot } from 'expo-router';
+
 import { AuthProvider } from '@/context/authContext/AuthContext';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { SafeAreaView, useColorScheme } from 'react-native';
 import Colors from '@/constants/Colors';
 
 const AppContext = ({children}: { children: JSX.Element | JSX.Element[]}) => {
