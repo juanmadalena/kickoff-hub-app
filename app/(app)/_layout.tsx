@@ -3,8 +3,10 @@ import { StatusBar, useColorScheme } from 'react-native';
 import { Redirect, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 
-import Colors from '@/constants/Colors';
 import { AuthContext } from '@/context/authContext/AuthContext';
+import { useFonts } from 'expo-font';
+import TopBarNavigator from '@/components/TopBarNavigator';
+import TopBarProfile from '@/components/TopBarProfile';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -12,13 +14,18 @@ export default function App(){
     //context
     const { status } = useContext(AuthContext);
 
+    // const [ loaded, error ] = useFonts({
+    //     'Montserrat': require('@/assets/fonts/Montserrat-Regular.ttf'),
+    // });
+
+    const loaded = true;
+
+    //hide splash screen
     useEffect(() => {
-        console.log('useEffect', status)
-        if(status !== 'checking'){
-            console.log('Hiding splash screen', new Date().getSeconds(), new Date().getMilliseconds());
+        if(status !== 'checking' && loaded){
             SplashScreen.hideAsync()
         }
-    }, [status]);
+    }, [status, loaded]);
 
 
     //check if user is authenticated
@@ -27,6 +34,7 @@ export default function App(){
     }
 
     if(status === 'authenticated'){
+        // fetchMatches(new Date().toDateString());
         return <AppNav />
     }
 
@@ -34,23 +42,16 @@ export default function App(){
 }
 
 function AppNav(){
-    const colorScheme = useColorScheme();
-
-    const background = Colors[colorScheme ?? 'light'].background;
 
     return (
         <>
-            <StatusBar hidden={true} />
+            <StatusBar />
             <Stack
-                screenOptions={{
-                    headerShown: false,
-                    contentStyle: { backgroundColor: background },
-                }}
-                initialRouteName='index'
+                initialRouteName='(tabs)'
             >
-                <Stack.Screen name="index" />
-                <Stack.Screen name="profile" />
-                {/* <Stack.Screen name="match/[id]" /> */}
+                <Stack.Screen name="(tabs)" options={{ header: () => <TopBarProfile/> }}/>
+                <Stack.Screen name="profile" options={{ header: () => <TopBarNavigator />}} />
+                <Stack.Screen name="match/[id]" options={{ header: () => <TopBarNavigator />}} />
             </Stack>
         </>
     )

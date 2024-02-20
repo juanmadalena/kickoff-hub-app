@@ -1,4 +1,4 @@
-import { ErrorResponse, User } from "@/interfaces/interfaces";
+import { ErrorResponse, User } from "@/interfaces";
 
 export interface AuthState {
     error: ErrorResponse | null;

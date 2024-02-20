@@ -6,7 +6,7 @@ export default {
     text: '#000',
     background: '#F2F2F2',
     itemBackground: '#E3E3E3',
-    selectionBackground: '#CBCBCB',
+    selectionBackground: '#c9c9c9',
     primaryColor: '#196b54',
     tint: tintColorLight,
     tabIconDefault: '#ccc',

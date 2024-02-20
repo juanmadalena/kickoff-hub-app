@@ -7,7 +7,7 @@ interface IconProps {
     size?: number;
     color?: string;
     // style?: StyleProp<TextProps['style']>;
-    style?: any;
+    style?: React.ComponentProps<typeof MaterialIcons>['style'];
 }
 
 const Icon = ( { name, size = 25 , color, style }: IconProps ) => {

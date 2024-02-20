@@ -46,6 +46,7 @@ export interface Match {
     num_players: number;
     min_players: number;
     max_players: number;
+    players:     User[];
 }
 
 export interface Organizer {
@@ -54,11 +55,30 @@ export interface Organizer {
     last_name:  string;
 }
 
-export interface MatchResponse {
+export interface MatchesResponse {
     matches: Match[];
+}
+
+export interface MatchResponse {
+    match: Match;
 }
 
 export interface ErrorResponse {
     message: string;
     input?: string;
+}
+
+
+export interface PlayersResponse {
+    players: Player[];
+}
+
+export interface Player {
+    id:                  string;
+    first_name:          string;
+    last_name:           string;
+    position:            string;
+    photo:               null | string;
+    secondary_positions: any[];
+    rating:              null;
 }

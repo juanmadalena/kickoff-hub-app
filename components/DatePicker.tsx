@@ -1,53 +1,79 @@
 import { StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import { Text } from '@/components/Themed';
+import { Text, View } from '@/components/Themed';
 import { useWeekdays } from '@/hooks/useWeekdays';
-import Colors from '@/constants/Colors';
 import { useThemeColor } from '@/components/Themed';
+import { useNavigation } from '@react-navigation/native';
+import { useState } from 'react';
+import { formatDateToString } from '@/utils/formatDateToString';
 
-const DatePicker = () => {
 
-    const { dayList, selectedDate, setSelectedDate } = useWeekdays();
+interface DatePickerProps {
+    initialDate?: Date;
+    onStateChange?: (date: Date) => void;
+}
 
+const DatePicker = ( {  initialDate = new Date(), onStateChange = () => null }:DatePickerProps ) => {
+    
+    const [ selectedDate, setSelectedDate ] = useState<string>(formatDateToString(initialDate));
+    const { dayList } = useWeekdays(initialDate);
+    
     const selectionBackground = useThemeColor({}, 'selectionBackground');
+    const background = useThemeColor({}, 'itemBackground');
+
+    const navigation = useNavigation();
+
+    const handleChange = (date: string) => {
+
+        setSelectedDate(date);
+        onStateChange(new Date(date));
+    }
 
     return (
-        <ScrollView 
-            style={styles.container}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-        >
-            {
-                dayList.map((day, index) => {
-                    const selected = selectedDate?.fullDate === day.fullDate;
-                    return (
-                        // Date Button
-                        <TouchableOpacity 
-                            key={index}
-                            style={{...styles.dateListItem, backgroundColor: selected ? selectionBackground : 'transparent'}}
-                            activeOpacity={0.8}
-                            onPress={() => setSelectedDate(day)}
-                        >
+        <View style={[styles.container, { backgroundColor: background }]}>
+            <ScrollView 
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                onTouchStart={() => navigation.setOptions({ swipeEnabled: false })}
+                onTouchEnd={() => navigation.setOptions({ swipeEnabled: true })}
+                onScrollBeginDrag={() => navigation.setOptions({ swipeEnabled: false })}
+                onScrollEndDrag={() => navigation.setOptions({ swipeEnabled: true })}
+            >
+                {
+                    dayList.map((day, index) => {
+                        const selected = selectedDate === day.fullDate;
 
-                            {/* day */}
-                            <Text style={[styles.day, , selected && styles.daySelected]}>
-                                {day.day}
-                            </Text>
+                        return (
+                            // Date Button
+                            <TouchableOpacity 
+                                key={index}
+                                style={{...styles.dateListItem, backgroundColor: selected ? selectionBackground : 'transparent'}}
+                                activeOpacity={0.8}
+                                onPress={() => handleChange(day.fullDate)}
+                            >
 
-                            {/* date */}
-                            <Text style={[styles.date, selected && styles.dateSelected]}>
-                                {day.date}
-                            </Text>
-                        </TouchableOpacity>
-                    )
-                })
-            }
-        </ScrollView>
+                                {/* day */}
+                                <Text style={[ selected ? styles.daySelected : styles.day]}>
+                                    {day.day}
+                                </Text>
+
+                                {/* date */}
+                                <Text style={[selected ? styles.dateSelected : styles.date]}>
+                                    {day.date}
+                                </Text>
+                            </TouchableOpacity>
+                        )
+                    })
+                }
+            </ScrollView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-
+    container:{
+        paddingVertical: 8,
+        paddingHorizontal:6, 
+        borderRadius:16
     },
     dateListItem: {
         width: 55,
@@ -55,9 +81,10 @@ const styles = StyleSheet.create({
         marginHorizontal: 2,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 50,
+        borderRadius: 16,
     },
     day: {
+        opacity: 0.2,
         fontSize: 12,
         fontWeight: '500',
     },
@@ -66,12 +93,13 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     date: {
+        opacity: 0.2,
         fontSize: 18,
-        fontWeight: '500',
+        fontWeight: '400',
     },
     dateSelected: {
         fontSize: 19,
-        fontWeight: '600',
+        fontWeight: '500',
     },
 });
 

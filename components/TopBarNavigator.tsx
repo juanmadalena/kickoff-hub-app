@@ -1,19 +1,17 @@
-import { SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native';
-import { View, Text } from '@/components/Themed';
-import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StyleSheet, TouchableOpacity } from 'react-native';
+import { View, useThemeColor } from '@/components/Themed';
 import { useRouter } from 'expo-router';
 import Icon from './Icon';
 
 const TopBarNavigator = () => {
 
     const router = useRouter()
-    const { height } = useSafeAreaFrame()
-    const {  } = useSafeAreaInsets()
+    const backgroundColor = useThemeColor({}, 'itemBackground');
 
     return (
-        <View style={{...styles.container}}>
-            <TouchableOpacity style={styles.backContainer} onPress={() => router.back()}>
-                <Icon name='arrow-back' size={24} color='black' />
+        <View style={[styles.container]}>
+            <TouchableOpacity style={[styles.backContainer, {backgroundColor}]} onPress={() => router.back()}>
+                <Icon name='arrow-back' size={24} />
             </TouchableOpacity>
             <View></View>
         </View>
@@ -23,21 +21,19 @@ const TopBarNavigator = () => {
 
 const styles = StyleSheet.create({
     container: { 
-        backgroundColor: 'transparent',
-        position: 'absolute',
-        paddingHorizontal: 20,
-        height: 80,
+        paddingHorizontal: 12,
+        // borderWidth:1,
+        // borderColor: 'yellow',
         width: '100%',
         justifyContent: 'space-between', 
         flexDirection: 'row',
         alignItems: 'center',
-        zIndex: 100,
+        marginBottom:8        
     },
     backContainer: {
-        backgroundColor: '#D9D9D9',
-        height: 60,
-        width: 60,
-        borderRadius: 30,
+        height: 50,
+        width: 50,
+        borderRadius: 120,
         alignItems: 'center',
         justifyContent: 'center',
     }

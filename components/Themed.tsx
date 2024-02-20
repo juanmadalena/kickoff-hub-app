@@ -8,7 +8,7 @@ type ThemeProps = {
 };
 
 export type TextProps = ThemeProps & DefaultText['props'];
-export type ViewProps = ThemeProps & DefaultView['props'];
+export type ViewProps = ThemeProps & DefaultView['props'] & { innerRef?: any };
 export type TextInputProps = ThemeProps & DefaultTextInput['props'] & { innerRef?: any, error?: boolean};
 export type ButtonProps = ThemeProps & DefaultTouchableOpacity['props'] & { loading?: boolean };;
 
@@ -34,10 +34,10 @@ export function Text(props: TextProps) {
 }
 
 export function View(props: ViewProps) {
-  const { style, lightColor, darkColor, ...otherProps } = props;
+  const { style, lightColor, darkColor, innerRef, ...otherProps } = props;
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
 
-  return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;
+  return <DefaultView ref={innerRef} style={[{ backgroundColor }, style]} {...otherProps} />;
 }
 
 export function Button(props: ButtonProps ) {

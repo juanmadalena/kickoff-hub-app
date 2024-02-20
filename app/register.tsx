@@ -59,7 +59,7 @@ const register = () => {
 
     useEffect(() => {
         if(status === 'authenticated'){
-            fadeOut(300, () => router.replace('/(app)/'))
+            fadeOut(300, () => router.replace('/(app)/(tabs)'))
         }
     }, [status])
 

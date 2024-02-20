@@ -24,11 +24,12 @@ const MatchDetailChip = ({ text, IconName }: Props) => {
 
 const styles = StyleSheet.create({
     container: {
+        opacity: 0.8,
         flexDirection: 'row',
-        padding: 5,
-        paddingHorizontal: 8,
+        paddingVertical: 6,
+        paddingHorizontal: 10,
         backgroundColor: '#2a2a2a',
-        borderRadius: 12,
+        borderRadius: 8,
         marginRight: 10,
     },
     text: {

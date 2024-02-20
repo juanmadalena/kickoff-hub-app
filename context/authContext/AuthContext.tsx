@@ -1,9 +1,9 @@
-import { createContext, useEffect, useReducer } from "react";
+import { createContext, useContext, useEffect, useReducer } from "react";
 import * as SecureStore from 'expo-secure-store';
 
-import { api } from "@/api/api";
+import { api } from "@/config/api";
 import { AuthState, authReducer } from "./authReducer";
-import { ErrorResponse, LoginData, LoginResponse, RegisterData, User } from "@/interfaces/interfaces";
+import { ErrorResponse, LoginData, LoginResponse, RegisterData, User } from "@/interfaces";
 
 interface AuthContextType {
     error: ErrorResponse | null,
@@ -60,7 +60,6 @@ export const AuthProvider = ({ children }:any) => {
 
     const register = async ({ email, firstName, lastName, password, position }: RegisterData) => {
         try{
-            console.log({ email, firstName, lastName, password, position })
             const { data } = await api.post<LoginResponse>('/auth/register', { email, firstName, lastName, password, position });
 
             dispatch({
