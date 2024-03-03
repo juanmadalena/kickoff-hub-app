@@ -1,20 +1,20 @@
-import { createContext, useContext, useEffect, useReducer } from "react";
+import { createContext, useEffect, useReducer } from "react";
 import * as SecureStore from 'expo-secure-store';
 
 import { api } from "@/config/api";
 import { AuthState, authReducer } from "./authReducer";
-import { ErrorResponse, LoginData, LoginResponse, RegisterData, User } from "@/interfaces";
+import { ErrorResponse, LoginData, LoginResponse, Player, RegisterData } from "@/interfaces";
 
 interface AuthContextType {
     error: ErrorResponse | null,
     token: string | null,
-    user: User | null,
+    user: Player | null,
     status: 'checking' | 'authenticated' | 'not-authenticated',
     register: (userData: any) => void,
     login: (data: LoginData) => void,
     logout: () => void,
-    removeError: () => void
-
+    removeError: () => void,
+    checkToken: () => void,
 } 
 
 const initialState: AuthState = {
@@ -88,7 +88,6 @@ export const AuthProvider = ({ children }:any) => {
     const login = async ({ email, password }: LoginData) => {
         try{
             const { data } = await api.post<LoginResponse>('/auth/login', { email, password });
-
             SecureStore.setItemAsync('token', data.token);
             
             return dispatch({
@@ -130,7 +129,8 @@ export const AuthProvider = ({ children }:any) => {
             register,
             login,
             logout,
-            removeError
+            removeError,
+            checkToken,
         }}>
             {children}
         </AuthContext.Provider>

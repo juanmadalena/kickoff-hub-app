@@ -22,6 +22,7 @@ export default function App(){
 
     //hide splash screen
     useEffect(() => {
+        console.log('status', status);
         if(status !== 'checking' && loaded){
             SplashScreen.hideAsync()
         }
@@ -34,7 +35,6 @@ export default function App(){
     }
 
     if(status === 'authenticated'){
-        // fetchMatches(new Date().toDateString());
         return <AppNav />
     }
 
@@ -48,10 +48,11 @@ function AppNav(){
             <StatusBar />
             <Stack
                 initialRouteName='(tabs)'
+                screenOptions={{ animation: 'fade' }}
             >
                 <Stack.Screen name="(tabs)" options={{ header: () => <TopBarProfile/> }}/>
-                <Stack.Screen name="profile" options={{ header: () => <TopBarNavigator />}} />
-                <Stack.Screen name="match/[id]" options={{ header: () => <TopBarNavigator />}} />
+                <Stack.Screen name="profile" options={{ headerShown: false }} />
+                <Stack.Screen name="match/[id]" options={{ headerShown: false }} />
             </Stack>
         </>
     )

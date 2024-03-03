@@ -22,7 +22,7 @@ export const commonStyles = StyleSheet.create({
     formContainer:{
         width:'100%', 
         paddingBottom:20, 
-        height:'70%'
+        height:'80%'
     },
     subtitle:{
         color: 'grey', 

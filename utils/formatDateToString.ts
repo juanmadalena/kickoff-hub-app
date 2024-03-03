@@ -2,11 +2,12 @@ type formats =
     |'yyyy-mm-dd'
     |'dd/mm'
 
-export function formatDateToString(date: Date | string, format?: formats): string {
+export function formatDateToString(date: Date | string | number, format?: formats): string {
     if(!date) return '';
 
-    if(typeof date === 'string') date = new Date(date);
+    if(typeof date === 'string' || typeof date === 'number') date = new Date(date);
     
+
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();

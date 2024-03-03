@@ -1,20 +1,44 @@
-import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
+import { FlatList, StyleSheet } from 'react-native';
 
 import { View, Text } from '@/components/Themed';
 import DatePicker from '@/components/DatePicker';
 import MatchItem from '@/components/MatchItem';
 import { useMatches } from '@/hooks/useMatches';
 import { formatDateToString } from '@/utils/formatDateToString';
+import { checkIfMatchIsAvailable } from '@/utils/checkIfMatchIsAvailable';
+import { useFocusEffect } from 'expo-router';
+import LoadingComponent from '@/components/LoadingComponent';
 
 const index = () => {
 
-    const [ selectedDate, setSelectedDate ] = useState<Date>(new Date('2024-02-17'));
-    const { matchesQuery: { data, isLoading, isError } } = useMatches(formatDateToString(selectedDate));
-    
+    const [ selectedDate, setSelectedDate ] = useState<Date>(new Date());
+    const { matchesQuery: { data, isLoading, isError, refetch } } = useMatches(formatDateToString(selectedDate));
+    const [ firstMatchAvailable, setFirstMatchAvailable ] = useState<number>(0);
+
     const handleDateChange = (date: Date) => {
         return setSelectedDate(date);
     }
+
+    // Iterate through matches and get first match available
+    const getFirstMatchAvailable = () => {
+        for(let i = 0; i < data?.matches?.length!; i++) {
+            if(checkIfMatchIsAvailable(data?.matches[i]) === 'join') {
+                setFirstMatchAvailable(i);
+                break;
+            }
+        }
+    }
+
+    // Refetch on focus
+    useFocusEffect(()=>{
+        refetch();
+    })
+
+    // Get first match available on data change
+    useEffect(() => {
+        getFirstMatchAvailable();
+    }, [data])
 
     return (
         <View style={styles.container}>
@@ -27,9 +51,7 @@ const index = () => {
             {/* Matches list */}
             {
                 isLoading ? 
-                <View style={{height:'40%', alignContent:'center', justifyContent:'center'}}>
-                    <ActivityIndicator size="large" color="grey" />
-                </View>
+                <LoadingComponent/>
                 :
                 
                 data?.matches?.length === 0 || isError ?

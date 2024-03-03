@@ -4,7 +4,6 @@ import { api } from "@/config/api";
 import { MatchResponse } from "@/interfaces";
 
 const getMatchById = async (id: string): Promise<MatchResponse> => {
-    console.log("fetching match");
     const { data } = await api.get(`/matches/${id}`);
     return data;
 }

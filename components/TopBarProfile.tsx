@@ -1,10 +1,10 @@
-import { View, Text } from '@/components/Themed';
-import { TouchableOpacity, StyleSheet } from 'react-native';
-import ProfilePicture from './ProfilePicture';
 import { useContext } from 'react';
-import { AuthContext } from '@/context/authContext/AuthContext';
+import { TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router'
-import Icon from './Icon';
+
+import { AuthContext } from '@/context/authContext/AuthContext';
+import { View, Text } from '@/components/Themed';
+import ProfilePicture from './ProfilePicture';
 
 const TopBarProfile = () => {
 
@@ -14,9 +14,9 @@ const TopBarProfile = () => {
 
     return (
         <View style={[styles.topBar, styles.paddingHorizontal]}>
-            <View style={{flexDirection: 'row', alignItems: 'center', paddingVertical:10, borderRadius:16, backgroundColor:'transparent'}}>
-                <TouchableOpacity activeOpacity={0.8} onPress={() => router.push({ pathname: '/(app)/profile/[id]', params: { id: '123' } })}>
-                    <ProfilePicture  height={50} width={50} />
+            <View style={{flexDirection: 'row', alignItems: 'center', borderRadius:16, backgroundColor:'transparent'}}>
+                <TouchableOpacity activeOpacity={0.8} onPress={() => router.push({ pathname: '/(app)/profile/[id]', params: { id: user?.id! } })}>
+                    <ProfilePicture uri={user?.photo}  height={50} width={50} />
                 </TouchableOpacity>
                 <View style={{marginLeft:8, backgroundColor:'transparent'}}>
                     <Text style={{fontSize:14}}>Hey 👋 </Text>
@@ -40,30 +40,15 @@ const styles = StyleSheet.create({
         flex:1,
     },
     paddingHorizontal: {
-        paddingHorizontal: 12,
+        paddingHorizontal: 16,
     },
     topBar: {
-        height: 65,
         marginTop: 0,
+        marginBottom:2,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
     },
-    titleContainer: {
-        width: '100%',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    title: {
-        fontSize: 18,
-        textAlign: 'left',
-        color: 'gray',
-    },
-    matchesList: {
-        paddingHorizontal: 10,
-        flex: 1,
-    }
 })
 
 export default TopBarProfile;

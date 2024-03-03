@@ -35,11 +35,11 @@ const register = () => {
     const { fadeIn, fadeOut, opacity } = useFade();
 
     const { firstName, lastName, position, email, password, onChange } = useForm<RegisterForm>({
-        firstName: 'juan',
-        lastName: 'madalena',
-        email: 'juanmadalena',
-        password: '1234',
-        position: 'GK',
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        position: '',
     });
 
 
@@ -64,8 +64,13 @@ const register = () => {
     }, [status])
 
     const modalHandler = () => {
-        Keyboard.dismiss();
-        setShowModal(!showModal);
+        Keyboard.addListener('keyboardDidHide', () => setShowModal(true));
+        if(keyboardActive) {
+            Keyboard.dismiss();
+            return;
+        }
+        setShowModal(true);
+        Keyboard.removeAllListeners('keyboardDidHide');
     }
 
     const handleSelection = ( value: string ) => {
@@ -87,19 +92,17 @@ const register = () => {
                         {/* Title */}   
                         <View style={commonStyles.titleContainer}>
                             <Text style={commonStyles.title}>Create an account</Text>
-                            {
-                                !keyboardActive && <Text style={commonStyles.subtitle}>Please fill the form to create an account</Text>
-                            }
+                            <Text style={commonStyles.subtitle}>Please fill the form to create an account</Text>
                         </View>
 
                         {/* Form */}
-                        <View style={commonStyles.formContainer}>
+                        <View style={[commonStyles.formContainer, { height:'80%' }]}>
 
                             <View style={styles.nameContainer}>
                                 <TextInput
                                     placeholder="First Name"
                                     autoCapitalize="words"
-                                    style={[styles.nameField]}
+                                    containerStyle={[styles.nameField]}
                                     value={firstName}
                                     onChangeText={ (value) => onChange(value, 'firstName')}
                                     enterKeyHint='next'
@@ -114,7 +117,7 @@ const register = () => {
                                     autoComplete='family-name'
                                     placeholder="Last Name" 
                                     autoCapitalize="words"
-                                    style={[styles.nameField]}
+                                    containerStyle={[styles.nameField]}
                                     value={lastName}
                                     onChangeText={ (value) => onChange(value, 'lastName')}
                                     enterKeyHint='next'
@@ -131,7 +134,6 @@ const register = () => {
                                 autoCapitalize="none"
                                 autoCorrect={ false }
                                 spellCheck={false}
-                                style={[ error?.input === 'email' && { borderColor: 'red' }]}
                                 value={email}
                                 onChangeText={ (value) => onChange(value, 'email')}
                                 enterKeyHint='next'
@@ -162,29 +164,38 @@ const register = () => {
                                 autoCapitalize="none"
                                 value={position}
                                 editable={false}
+                                onSelectionChange={ () => console.log('selection change')}
+                                onChangeText={ () => console.log('changeText')}
+                                onChange={ () => console.log('changeSolo')}
+                                onEndEditing={ () => console.log('end editing')}
+                                onSubmitEditing={ () => console.log('submit editing')}
                                 autoCorrect={ false }
-                                onTouchStart={modalHandler}
+                                onTouchStart={() => Keyboard.dismiss()}
+                                onTouchEnd={() => setShowModal(true)}
                                 error={error?.input === 'position'}
                                 innerRef={positionRef}
                             />
 
                             <View>
-                                <BottomModal 
-                                    transparent={true}
-                                    visible={showModal}
-                                    animationType='fade'
-                                    modalHeight={'50%'}
-                                >
-                                    <PositionPicker
-                                        style={{flex:1}} 
-                                        position={position}
-                                        onSelectPosition={handleSelection}
-                                    />
-                                </BottomModal>
+                                {
+                                    showModal &&
+                                    <BottomModal
+                                        duration={300}
+                                        transparent={true}
+                                        visible={showModal}
+                                        animationType='fade'
+                                        modalHeight={450}
+                                    >
+                                        <PositionPicker
+                                            position={position}
+                                            onSelectPosition={handleSelection}
+                                        />
+                                    </BottomModal>
+                                }
                             </View>
 
                             {/* Button to submit */}
-                            <Button loading={loading} onPress={handleRegister} disabled={loading}>
+                            <Button style={{marginTop:18}} loading={loading} onPress={handleRegister} disabled={loading}>
                                 <Text style={commonStyles.buttonText}>Create account</Text>
                             </Button>
                         </View>
@@ -211,7 +222,7 @@ const register = () => {
 const styles = StyleSheet.create({
     nameField: {
         minWidth: 160,
-        width: '48%',
+        width: '49%',
     },
     nameContainer: {
         backgroundColor: 'transparent',

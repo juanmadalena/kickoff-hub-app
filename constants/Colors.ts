@@ -14,7 +14,7 @@ export default {
   },
   dark: {
     text: '#fff',
-    background: '#000',
+    background: '#000000',
     itemBackground: '#141414',
     selectionBackground: '#2a2a2a',
     primaryColor: '#005b41',

@@ -1,27 +1,26 @@
-import { Modal, StyleSheet, Animated } from 'react-native';
-import { View, useThemeColor } from './Themed';
 import { useEffect } from 'react';
+import { Modal, StyleSheet, Animated, Dimensions } from 'react-native';
+
+import { View, useThemeColor } from '@/components/Themed';
 
 type BottomModalProps = Modal['props'] & {
-    visible: boolean;
+    visible?: boolean;
+    duration: number;
     children: React.ReactNode;
-    modalHeight: number | "auto" | Animated.Value | `${number}%` | Animated.AnimatedInterpolation<string | number> | Animated.WithAnimatedObject<Animated.AnimatedNode> | null | undefined;
+    modalHeight: number | "auto" | Animated.Value | `${number}%` | Animated.AnimatedInterpolation<string | number> | Animated.WithAnimatedObject<Animated.AnimatedNode>  | undefined;
     setVisible?: () => void;
 }
 
 const BottomModal = ( props : BottomModalProps ) => {
     
-    const { visible, children, modalHeight = '35%', setVisible, ...otherProps } = props as BottomModalProps;
+    const { visible = true, children, modalHeight = '35%', duration = 300, setVisible, ...otherProps } = props as BottomModalProps;
+
+    const { height } = Dimensions.get('screen');
 
     //Animation for the modal
-    const translateY = new Animated.Value(200);
+    const translateY = new Animated.Value(height);
 
     const backgroundColor = useThemeColor({}, 'itemBackground');
-
-    const handleSetVisible = () => {
-        console.log('handleSetVisible');
-        setVisible ? setVisible() : null;
-    }
 
     useEffect(() => {
         if(visible){
@@ -33,33 +32,15 @@ const BottomModal = ( props : BottomModalProps ) => {
         Animated.timing(translateY, {
             delay: 50,
             toValue: 0,
-            duration: 300,
+            duration: duration,
             useNativeDriver: true,
         }).start()
     }
 
-    const handleMoveOut = (callback?: Function) => {
-        Animated.timing(translateY, {
-            delay: 0,
-            toValue: 300,
-            duration: 200,
-            useNativeDriver: true,
-        }).start( () => callback ? callback() : null)
-    }
-
-    // handleMoveIn();
-
-    // useEffect(() => {
-    //     if(visible){
-    //         handleMoveIn();
-    //     }
-    // },[visible])
-
-
     return (
-        <Modal {...otherProps} onTouchStart={() => console.log('nop')}>
+        <Modal {...otherProps}>
             <View style={styles.container}>
-                <Animated.View onTouchStart={() => null} style={{...styles.bottomContainer, height: modalHeight ,backgroundColor, transform: [{translateY:translateY}], zIndex:999}}>
+                <Animated.View style={{...styles.bottomContainer, height: modalHeight ,backgroundColor, transform: [{translateY:translateY}], zIndex:999}}>
                         {children}
                 </Animated.View>
             </View>

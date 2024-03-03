@@ -1,19 +1,20 @@
-import { StyleSheet, View, useColorScheme } from 'react-native';
-import { Text } from './Themed';
+import { StyleSheet, View } from 'react-native';
+
 import Icon from './Icon';
-import Colors from '@/constants/Colors';
+import { Text, useThemeColor } from '@/components/Themed';
 
 interface Props {
-    text: string;
-    IconName?: React.ComponentProps<typeof Icon>['name'];
+    text: string
+    IconName?: React.ComponentProps<typeof Icon>['name'],
+    style?: View['props']['style']
 }
 
-const MatchDetailChip = ({ text, IconName }: Props) => {
+const MatchDetailChip = ({ text, IconName, style }: Props) => {
 
-    const colorScheme = useColorScheme()
+    const backgroundColor = useThemeColor({}, 'selectionBackground');
 
     return (
-        <View style={{...styles.container, backgroundColor: Colors[colorScheme ?? 'light'].selectionBackground }}>
+        <View style={[{...styles.container, backgroundColor}, style]} >
             {
                 IconName && <Icon name={IconName} size={14} style={{marginRight: 4}}/>
             }

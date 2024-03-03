@@ -1,10 +1,4 @@
-enum Position {
-    mf = 'mf',
-    df = 'df',
-    fw = 'fw',
-    gk = 'gk',
-
-}
+export type Position = 'GK' | 'DF' | 'MF' | 'ST';
 
 export interface LoginData {
     email: string;
@@ -20,7 +14,7 @@ export interface RegisterData {
 }
 
 export interface LoginResponse {
-    user:  User;
+    user:  Player;
     token: string;
 }
 
@@ -31,13 +25,15 @@ export interface User {
     position:   string;
     email:      string;
     photo?:     string;
+    rating?:    number;
 }
 
 export interface Match {
     id:          string;
-    organizer:   Organizer;
+    organizer?:   Player;
     date:        string;
     time:        string;
+    duration:    string;
     description: string;
     location:    string;
     latitude:    number;
@@ -46,13 +42,14 @@ export interface Match {
     num_players: number;
     min_players: number;
     max_players: number;
-    players:     User[];
+    players:     Player[];
 }
 
 export interface Organizer {
     id:         string;
     first_name: string;
     last_name:  string;
+    photo:      string;
 }
 
 export interface MatchesResponse {
@@ -77,8 +74,41 @@ export interface Player {
     id:                  string;
     first_name:          string;
     last_name:           string;
-    position:            string;
-    photo:               null | string;
-    secondary_positions: any[];
+    position:            Position;
+    photo?:               null | string;
+    secondary_positions?: any[];
     rating:              null;
+    email?:               string;
+}
+
+export interface MatchesPlayedResponse {
+    matches: MatchPlayed[];
+}
+
+export interface MatchPlayed {
+    title: string;
+    data:  MatchesPlayedData[];
+}
+
+export interface MatchesPlayedData {
+    id:          string;
+    date:        string;
+    time:        string;
+    duration:    string;
+    location:    string;
+    price:       number;
+    num_players: number;
+    min_players: number;
+    max_players: number;
+}
+
+export interface UserDataResponse {
+    user:             Player;
+    matchesPlayed:    MatchesCount;
+    matchesOrganized: MatchesCount;
+    lastMatchPlayed:  Match;
+}
+
+export interface MatchesCount {
+    count: string;
 }

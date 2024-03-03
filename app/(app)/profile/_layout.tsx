@@ -1,26 +1,18 @@
-import { View, Text, Button } from '@/components/Themed';
-import TopBarNavigator from '@/components/TopBarNavigator';
-import { AuthContext } from '@/context/authContext/AuthContext';
-import { useContext } from 'react';
+import { Stack } from 'expo-router';
 
-const profile = () => {
-
-    const { logout, user } = useContext( AuthContext )
-
-    const handleLogout = () => {
-        logout();
-    }
-
+const profileLayout = () => {
     return (
-        <View>
-            <TopBarNavigator />
-            <View style={{marginTop: 100, width:'100%'}}>
-                <Button style={{width:'50%'}} onPress={handleLogout}>
-                    <Text>Logout</Text>
-                </Button>
-            </View>
-        </View>
+        <Stack 
+            initialRouteName='[id]'
+            screenOptions={{ headerShown: false, animation: 'fade' }}
+        >
+            <Stack.Screen name='[id]' />
+            <Stack.Screen name='editProfile' />
+            <Stack.Screen name='(modals)/editBasicInfo' options={{ presentation: 'modal', animation:'fade_from_bottom' }} />
+            <Stack.Screen name='(modals)/editEmail' options={{ presentation: 'modal', animation:'fade_from_bottom' }} />
+            <Stack.Screen name='(modals)/editPassword' options={{ presentation: 'modal', animation:'fade_from_bottom' }} />
+        </Stack>
     );
 };
 
-export default profile;
+export default profileLayout;

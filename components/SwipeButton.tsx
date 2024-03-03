@@ -1,8 +1,9 @@
+import { useRef } from 'react';
+import { Animated, Dimensions, PanResponder, StyleSheet, View as DefaultView } from 'react-native';
+
 import { View, Text } from '@/components/Themed';
-import { useRef, useState } from 'react';
-import { Animated, Dimensions, PanResponder } from 'react-native';
-import Icon from './Icon';
 import { useBounce } from '@/hooks/useBounce';
+import Icon from './Icon';
 
 interface SwipeButtonProps {
   type: 'join' | 'leave' | 'full' | 'disabled',
@@ -48,7 +49,8 @@ const SwipeButton = ( { onSwiped, type }: SwipeButtonProps ) => {
     const containerColor = useRef(new Animated.Value(0)).current;
 
     // custom hook for arrow bounce animation
-    const { transformX } = useBounce(2.5, 500);
+    const BOUNCE = type === 'join' ? 2.5 : 0;
+    const { transformX } = useBounce(BOUNCE, 500);
 
     // swipe button width
     let { width } = Dimensions.get('window');
@@ -112,28 +114,59 @@ const SwipeButton = ( { onSwiped, type }: SwipeButtonProps ) => {
     }
 
     return (
-        <Animated.View  style={{position:'absolute', bottom:10, left:20,width:'90%', borderRadius:18, padding:10, ...backgroundStyles}}>
-          <View {...panResponder.panHandlers} style={{backgroundColor:'transparent', flexDirection:'row', alignItems:'center'}}>
+        <Animated.View  style={[styles.container, !disabled ? {...backgroundStyles} : {opacity:0.8}]}>
+          <DefaultView { ...!disabled ? {...panResponder.panHandlers} : ''} style={[styles.innerContainer]}>
           {
             disabled ? 
-              <View style={{height: 40, width: '100%', backgroundColor:'transparent', borderRadius: 12, justifyContent: 'center', alignItems: 'center', zIndex:999}}>
+              <DefaultView style={[ styles.track, {width: '100%'}]}>
                 <Text style={{opacity:0.4}}>{ text }</Text>
-              </View>
+              </DefaultView>
             :
               <>
                 <Animated.View
-                    style={[{height: 40, width: 40, backgroundColor: 'white', borderRadius: 12, justifyContent: 'center', alignItems: 'center', zIndex:999}, swipeStyles]}
+                    style={[ styles.track, swipeStyles, { width: 40, backgroundColor: 'white'}]}
                 >
                     <Animated.View style={{transform: [{translateX: transformX}]}}>
                         <Icon name='arrow-forward' size={24} color='black' />
                     </Animated.View>
                 </Animated.View>
-                <Text style={{position:'absolute', textAlign:'center', color:'white', fontSize:14, fontWeight:'600', width:'100%'}}>{text}</Text>
+                <Text style={styles.placeholder}>{text}</Text>
               </>
           }
-          </View>
+          </DefaultView>
         </Animated.View>
     );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    position:'absolute', 
+    bottom:10, 
+    left:20,
+    width:'90%', 
+    borderRadius:18, 
+    padding:10,
+    backgroundColor: '#222222',
+  },
+  innerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  track: {
+    height: 40, 
+    borderRadius: 12, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    zIndex:999
+  },
+  placeholder: {
+    position:'absolute', 
+    textAlign:'center', 
+    color:'white', 
+    fontSize:14, 
+    fontWeight:'600', 
+    width:'100%'
+  }
+});
 
 export default SwipeButton;

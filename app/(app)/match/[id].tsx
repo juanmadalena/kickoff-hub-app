@@ -1,277 +1,267 @@
-import { ActivityIndicator, Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { View as DefaultView, ScrollView, StyleSheet, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 
 import { Button, Text, View, useThemeColor } from '@/components/Themed';
 import { useMatch } from '@/hooks/useMatch';
-import { formatDateToString } from '../../../utils/formatDateToString';
-import MapView, { Marker } from 'react-native-maps';
+import { formatDateToString } from '@/utils/formatDateToString';
 import ProfilePicture from '@/components/ProfilePicture';
 import SwipeButton from '@/components/SwipeButton';
 import BottomModal from '@/components/BottomModal';
 import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '@/context/authContext/AuthContext';
-import { useJoinMatch, usePlayers } from '@/hooks/usePlayers';
+import { useJoinMatch, useLeaveMatch, usePlayers } from '@/hooks/usePlayers';
+import Icon from '@/components/Icon';
+import PlayersList from '@/components/PlayersList';
+import Map from '@/components/Map';
+import { formatTimeDuration } from '@/utils/formatTimeDuration';
+import { checkIfMatchIsAvailable } from '@/utils/checkIfMatchIsAvailable';
+import MutationStatus from '@/components/MutationStatus';
+import { sleep } from '@/utils/sleep';
+import LoadingComponent from '@/components/LoadingComponent';
+import TopBarNavigator from '@/components/TopBarNavigator';
 
 const Match = () => {
 
-    
     //Get the match id passed from the route
     const { id } = useLocalSearchParams()
-
+    
     //Get the user from the context
     const { user } = useContext( AuthContext );
     
     //Get the match data from the id
-    const { matchQuery: { data, isLoading, isError } } = useMatch(id as string)
+    const { matchQuery } = useMatch(id as string)
 
+    //Get the background color from the theme
+    const backgroungColor = useThemeColor({}, 'itemBackground')
+
+    //Get the players from the match
     const { playersQuery } = usePlayers(id as string)
+
+    //Mutations for joining and leaving the match
     const { joinMatchQuery } = useJoinMatch(id as string, user?.id! )
-
-    // useEffect(() => {
-    //     if(joinMatchQuery.isSuccess){
-    //         playersQuery.refetch();
-    //         checkIfMatchIsAvailable();
-    //         setShowModal(false);
-    //     }
-    // }, [joinMatchQuery.isSuccess])
-
+    const { leaveMatchQuery } = useLeaveMatch(id as string, user?.id! )
+    
     //State for the modal
     const [ showModal, setShowModal ] = useState(false);
 
     //State for the swipe button
     const [ swipeType, setSwipeType ] = useState<'join' | 'leave' | 'full' | 'disabled'>('join');
+    const [ isMutationGoing, setIsMutationGoing ] = useState<'joining' | 'leaving'>();
 
-    //check if the match is available
-    const checkIfMatchIsAvailable = () => {
-        const formatDate = data?.match.date.split('T')[0]
-        const matchDate = new Date(formatDate+'T'+data?.match.time+'.000Z');
-
-        //Check if the match is in the past
-        if( matchDate < new Date() ){
-            return setSwipeType('disabled');
-        }
-
-        //Check if the match is full
-        if( data?.match.players.length! >= data?.match.max_players!){
-            return setSwipeType('full');
-        }
+    //Handle the mutation and close the modal
+    const handleMutation = async (mutation: any, action: 'joining' | 'leaving') => {
+        setIsMutationGoing(action)
+        await mutation.mutateAsync();
+        closeModal()
+    }
         
-        //Check if the user is already in the match
-        if( playersQuery.data?.players.find(player => player.id === user?.id ) ){
-            return setSwipeType('leave');
-        }
-
-        return setSwipeType('join');
-    }
-
-    const handleJoinMatch = () => {
-        joinMatchQuery.mutate();
-    }
-
     useEffect(() => {
-        if(joinMatchQuery.isSuccess){
-            setSwipeType('leave')
-            setShowModal(false);
-            playersQuery.refetch();
-        }
-        checkIfMatchIsAvailable();
-    }, [playersQuery.data, joinMatchQuery.isSuccess])
+        setSwipeType( checkIfMatchIsAvailable( matchQuery.data?.match , playersQuery.data?.players, user?.id! ) );
+    }, [playersQuery])
 
-    const initialRegion = {
-        latitude: 37.78825,
-        longitude: -122.4324,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      };
+    const resetMutations = () => {
+        joinMatchQuery.reset();
+        leaveMatchQuery.reset();
+    }
 
-    const backgroungColor = useThemeColor({}, 'itemBackground')
+    const closeModal = async () => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        //Time so the user can see the success or error message
+        await sleep(1000);
+        setShowModal(false);
+        setIsMutationGoing(undefined);
+        resetMutations();
+    }
 
     return (
-        <View style={{flex:1}}>
-                {
-                    isLoading &&
-                    <ActivityIndicator size={40} color={'grey'} />
-                }
-                {
-                    isError &&
-                    <Text>Match not found!</Text>
-                }
-                {
-                    data &&
-                    <>
-                    <ScrollView style={{height:'100%'}} bounces={false}>
-                        {/* Location */}
-                        <View style={{flexDirection:'column', flex:1, justifyContent:'space-between', paddingHorizontal:12, marginBottom:8}}>
-                            <View style={{width:'100%', borderRadius:16, backgroundColor: backgroungColor, alignItems:'center', justifyContent:'space-around', paddingVertical:8}}>
-                                <View style={{ height: 210, width:'100%', paddingVertical:4, paddingHorizontal:12, backgroundColor:'transparent' }}>
-                                    <MapView style={styles.map} 
-                                        initialRegion={initialRegion}
-                                        maxDelta={0.1}
-                                        minDelta={0.01}   
-                                        scrollEnabled={false}   
-                                        mapType='standard'    
-                                    />
-                                        <Marker
-                                            coordinate={{ latitude: 37.78825, longitude: -122.4324 }}
-                                            title="Mi Marcador"
-                                            description="Descripción de mi marcador"
-                                        />
-                                </View>  
-                                <View style={{marginTop:10, backgroundColor:'transparent', borderWidth:0, borderColor:'red', width:'100%'}}>
-                                    {/* <Text style={{textAlign:'center', opacity:0.2}}>
-                                        Location
-                                    </Text> */}
-                                    <Text style={{ fontSize:34, fontWeight:'500', textAlign:'center', marginBottom:8 }}>
-                                        {data?.match.location}
-                                    </Text>
-                                    <Text style={{opacity:0.6, textAlign:'center',marginBottom:6, paddingHorizontal:12}}>
-                                        97 Slievenamon Rd, Drimnagh, Dublin 12, D12 FX97
-                                    </Text>
+        <>
+            <TopBarNavigator />
+            <View style={{flex:1}}>
+                    {
+                        matchQuery.isLoading ?
+                        <LoadingComponent />
+                        :
+                        matchQuery.isError ?
+                        <Text>Error loading match</Text>
+                        :
+                        matchQuery.data &&
+                        <>
+                        <ScrollView style={{height:'100%'}} bounces={false} showsVerticalScrollIndicator={false}>
+                            {/* Location */}
+                            <View style={[styles.container, { flexDirection:'column' }]}>
+                                <View style={[styles.dataContainer, {width:'100%', backgroundColor: backgroungColor}]}>
+                                    <DefaultView style={[styles.mapContainer]}>
+                                        <Map initialRegion={{latitude: matchQuery.data?.match.latitude!, longitude: matchQuery.data?.match.longitude!, latitudeDelta: 0.0922, longitudeDelta: 0.0421 }} />
+                                    </DefaultView>  
+                                    <DefaultView style={{marginTop:10, backgroundColor:'transparent', borderWidth:0, borderColor:'red', width:'100%'}}>
+                                        <Text style={[styles.locationTitle]}>
+                                            {matchQuery.data?.match.location}
+                                        </Text>
+                                        <Text style={[styles.dataTitle, { paddingHorizontal:12, textAlign:'center' }]}>
+                                            97 Slievenamon Rd, Drimnagh, Dublin 12, D12 FX97
+                                        </Text>
+                                    </DefaultView>
                                 </View>
                             </View>
-                        </View>
 
-                        {/* Date, Hour, Duration */}
-                        <View style={{flexDirection:'row', flex:1, justifyContent:'space-between', paddingHorizontal:12, marginBottom:8}}>
-                            <View style={{height:110, width:'32%', borderRadius:16, backgroundColor: backgroungColor, alignItems:'center', justifyContent:'space-around', paddingVertical:8}}>
-                                <Text style={{opacity:0.2}}>Date</Text>
-                                <Text style={{ fontSize:120, borderColor:'green', borderWidth:0, width:'100%', height:'45%', textAlign:'center' }} adjustsFontSizeToFit>
-                                    { formatDateToString(data?.match.date, 'dd/mm') }
-                                </Text>
-                                <Text></Text>
-                            </View>
-                            <View style={{height:110, width:'32%', borderRadius:16, backgroundColor: backgroungColor, alignItems:'center', justifyContent:'space-around', paddingVertical:8}}>
-                                <Text style={{opacity:0.2}}>Hour</Text>
-                                <Text style={{ fontSize:120, borderColor:'green', borderWidth:0, width:'100%', height:'45%', textAlign:'center' }} adjustsFontSizeToFit>
-                                    { data?.match.time.slice(0,-3) }
-                                </Text>
-                                <Text></Text>
-                            </View>
-                            <View style={{height:110, width:'32%', borderRadius:16, backgroundColor: backgroungColor, alignItems:'center', justifyContent:'space-around', paddingVertical:8}}>
-                                <Text style={{opacity:0.2}}>Duration</Text>
-                                <Text style={{ fontSize:120, borderColor:'green', borderWidth:0, width:'100%', height:'45%', textAlign:'center' }} adjustsFontSizeToFit>
-                                    01:00
-                                </Text>
-                                <Text></Text>
-                            </View>
-                        </View>
-
-                        {/* Players */}
-                        <View style={{flexDirection:'column', flex:1, justifyContent:'space-between', paddingHorizontal:12, marginBottom:8}}>
-                            <View style={{width:'100%', borderRadius:16, backgroundColor: backgroungColor, alignItems:'center', justifyContent:'space-around', paddingVertical:8}}>
-                                <View style={{backgroundColor:'transparent', width:'100%', paddingHorizontal:16, paddingVertical:14, flexDirection:'row', justifyContent:'space-between', borderWidth:0, borderColor:'red'}}>
-                                    <Text style={{opacity:0.2, fontSize:16}}>Players</Text>
-                                    <Text style={{opacity:0.2, fontSize:16}}>
-                                        {data?.match.players.length} / {data?.match.max_players}
+                            {/* Date, Hour, Duration */}
+                            <View style={[styles.container]}>
+                                <View style={[ styles.dataContainer, {height:110, width:'32%', backgroundColor: backgroungColor }]}>
+                                    <Text style={[styles.dataTitle]}>Date</Text>
+                                    <Text style={[styles.dataText]} adjustsFontSizeToFit>
+                                        { formatDateToString(matchQuery.data?.match.date!, 'dd/mm') }
                                     </Text>
+                                    <Text></Text>
                                 </View>
-                                <View style={{backgroundColor:'transparent', borderWidth:0, borderColor:'red', width:'100%', paddingHorizontal:10}}>
-                                    {
-                                        playersQuery.data?.players.map((player, index) => (
-                                            <View key={index} style={{backgroundColor:'transparent', marginBottom:16, flexDirection:'row'}}>
-                                                <ProfilePicture uri={player.photo} />
-                                                <View style={{backgroundColor:'transparent', justifyContent:'center', marginLeft:10, width:'65%'}}>
-                                                    <Text style={{fontSize:18}}>{player.first_name} {player.last_name}</Text>
-                                                    <Text style={{opacity:0.4}}>{ player.position }</Text>
-                                                </View>
-                                                <View style={{backgroundColor:'transparent', justifyContent:'center', marginLeft:10}}>
-                                                    <View style={{backgroundColor:'#222222', borderRadius:12, paddingHorizontal:10, borderWidth:0, borderColor:'red', flex:1, justifyContent:'center'}}>
-                                                        <Text style={{fontWeight:'600'}}> {player.rating ?? '0.0'} </Text>
-                                                    </View>
-                                                </View>
-                                            </View>
-                                        ))
-                                    }
-                                    {
-                                        playersQuery.data?.players.length === 0 &&
-                                        <View style={{backgroundColor:'transparent', height:100, alignItems:'center', justifyContent:'center'}}>
-                                            <Text style={{textAlign:'center', opacity:0.4, fontSize:16}}>Be the first to join</Text>
-                                        </View>
-                                    }
-                                    {
-                                        playersQuery.isLoading &&
-                                        <ActivityIndicator size={40} color={'grey'} />
-                                    }
+                                <View style={[styles.dataContainer, {height:110, width:'32%', backgroundColor: backgroungColor}]}>
+                                    <Text style={[styles.dataTitle]}>Hour</Text>
+                                    <Text style={[styles.dataText]} adjustsFontSizeToFit>
+                                        { formatTimeDuration(matchQuery.data?.match.time!) }
+                                    </Text>
+                                    <Text></Text>
+                                </View>
+                                <View style={[styles.dataContainer, {height:110, width:'32%', backgroundColor: backgroungColor}]}>
+                                    <Text style={[styles.dataTitle]}>Duration</Text>
+                                    <Text style={[styles.dataText]} adjustsFontSizeToFit>
+                                        { formatTimeDuration(matchQuery.data?.match.duration!) }
+                                    </Text>
+                                    <Text></Text>
                                 </View>
                             </View>
-                        </View>
 
-                        {/* Description */}
-                        <View style={{flexDirection:'row', flex:1, justifyContent:'space-between', paddingHorizontal:12, marginBottom:8}}>
-                            <View style={{width:'49%', borderRadius:16, backgroundColor: backgroungColor, alignItems:'center', justifyContent:'space-around', paddingVertical:8}}>
-                                <Text style={{opacity:0.2, fontSize:16, marginVertical:8}}>Organizer</Text>
-                                <View style={{backgroundColor:'transparent', borderWidth:0, borderColor:'red', width:'100%', paddingHorizontal:10, alignItems:'center'}}>
-                                    <ProfilePicture />
-                                    <Text style={{fontSize:16, marginVertical:8}}>{data.match.organizer.first_name} {data.match.organizer.last_name}</Text>
+                            {/* Players */}
+                            <View style={[styles.container, { flexDirection:'column' }]}>
+                                <View style={[styles.dataContainer, {width:'100%', backgroundColor: backgroungColor}]}>
+                                    <DefaultView style={{backgroundColor:'transparent', width:'100%', paddingHorizontal:16, paddingVertical:8, flexDirection:'row', justifyContent:'space-between', borderWidth:0, borderColor:'red'}}>
+                                        <Text style={[styles.dataTitle]}>Players</Text>
+                                        <Text style={[styles.dataTitle]}>
+                                            {matchQuery.data?.match.num_players} / {matchQuery.data?.match.max_players}
+                                        </Text>
+                                    </DefaultView>
+                                    <DefaultView style={{backgroundColor:'transparent', borderWidth:0, borderColor:'red', width:'100%', paddingHorizontal:10}}>
+                                        <DefaultView style={{backgroundColor:'transparent', paddingHorizontal:10, paddingVertical:10}}>
+                                            {
+                                                playersQuery.isLoading ?
+                                                <LoadingComponent size={'small'} />
+                                                :
+                                                playersQuery.isError ?
+                                                <Text>Error loading players</Text>
+                                                :
+                                                <PlayersList players={playersQuery.data?.players} />
+                                            }
+                                        </DefaultView>
+                                    </DefaultView>
                                 </View>
                             </View>
-                        </View>
-                        <View style={{height:68}}></View>
-                    </ScrollView>
-                    <SwipeButton 
-                        type={swipeType}
-                        onSwiped={() => setShowModal(true)} />
-                    <View>
-                        {
-                            showModal &&
-                                <BottomModal 
-                                    transparent={true}
-                                    visible={showModal}
-                                    animationType='fade'
-                                    modalHeight={'30%'}
-                                    setVisible={() => setShowModal(false)}
-                                >
-                                    {
-                                        joinMatchQuery.isPending ?
-                                        <ActivityIndicator size={40} color={'grey'} />
-                                        :
-                                        <>
-                                            <Button  onPress={() => setShowModal(false)}>
-                                                <Text>
-                                                    Close
+
+                            {/* Organizer */}
+                            <TouchableWithoutFeedback onPress={() => router.push({pathname:'/(app)/profile/[id]', params: { id: matchQuery.data.match.organizer?.id! }})}>
+                                <View style={[styles.container]}>
+                                    <View style={[styles.dataContainer ,{width:'49%', backgroundColor: backgroungColor }]}>
+                                        <Text style={[styles.dataTitle, {marginBottom:10}]}>Organizer</Text>
+                                        <DefaultView style={{backgroundColor:'transparent',width:'100%', alignItems:'center', marginBottom:10}}>
+                                            <ProfilePicture player={matchQuery.data.match.organizer} uri={matchQuery.data.match.organizer?.photo!} />
+                                            <Text style={{fontSize:16, marginTop:8}}>{matchQuery.data.match.organizer?.first_name} {matchQuery.data.match.organizer?.last_name}</Text>
+                                        </DefaultView>
+                                    </View>
+                                </View>
+                            </TouchableWithoutFeedback>
+                            <View style={{height:68}}></View>
+                        </ScrollView>
+                        <SwipeButton 
+                            type={swipeType}
+                            onSwiped={() => setShowModal(true)} />
+                        <View>
+                            {
+                                showModal &&
+                                    <BottomModal 
+                                        duration={300}
+                                        transparent={true}
+                                        visible={showModal}
+                                        animationType='fade'
+                                        modalHeight={220}
+                                        setVisible={() => setShowModal(false)}
+                                    >
+                                        {
+                                            isMutationGoing ?
+                                            <DefaultView style={{position:'absolute', top:0, left:0, right:0, bottom:0, backgroundColor:'transparent', alignItems:'center', justifyContent:'center'}}>
+                                                {
+                                                    isMutationGoing === 'joining' ?
+                                                    <MutationStatus mutation={joinMatchQuery} successMessage={'Enjoy!!'} />
+                                                    : isMutationGoing === 'leaving' &&
+                                                    <MutationStatus mutation={leaveMatchQuery} successMessage={'See you soon'} />
+                                                }
+                                            </DefaultView>
+                                            :
+                                            <DefaultView style={{justifyContent:'space-between', backgroundColor:'transparent', flex:1, paddingBottom:20}}>
+                                                <DefaultView style={{backgroundColor:'transparent', width:'100%', alignItems:'flex-end'}}>
+                                                    <TouchableOpacity onPress={() => setShowModal(false)} style={{borderRadius:20, backgroundColor:backgroungColor, opacity:0.4, padding:2}}>
+                                                        <Icon name={"close"} style={{opacity:0.4}} />
+                                                    </TouchableOpacity>
+                                                </DefaultView>
+                                                <Text style={{fontSize:24, textAlign:'center'}}>
+                                                    {swipeType === 'join' ? 'Join' : 'Leave'} the match? { swipeType === 'join' ? '⚽' : '😢' }
                                                 </Text>
-                                            </Button>
-                                            <Text>
-                                                Modal content
-                                            </Text>
-                                            <Button onPress={() => handleJoinMatch()}>
-                                                <Text>
-                                                    Join
-                                                </Text>
-                                            </Button>
-                                        </>
-                                    }
-                                </BottomModal>
-                        }
-                    </View>
-                    </>
-                }
-        </View>
+                                                <Button 
+                                                    onPress={() => handleMutation(swipeType === 'join'? joinMatchQuery : leaveMatchQuery, swipeType === 'join' ? 'joining' : 'leaving')}
+                                                    style={{marginTop:8, width:'100%'}}
+                                                >
+                                                    <Text>
+                                                        {swipeType === 'join' ? 'Join' : 'Leave'}
+                                                    </Text>
+                                                </Button>
+                                            </DefaultView>
+                                        }
+                                    </BottomModal>
+                            }
+                        </View>
+                        </>
+                    }
+            </View>
+        </>
     );
 };
 
 
 const styles = StyleSheet.create({
+
+    container: {
+        flexDirection:'row', 
+        flex:1, 
+        justifyContent:'space-between', 
+        paddingHorizontal:12, 
+        marginBottom:8
+    },
+    dataContainer: {
+        borderRadius:16, 
+        alignItems:'center', 
+        justifyContent:'space-between', 
+        paddingVertical:8
+    },
+    dataText: {
+        fontSize:120,
+        width:'100%', 
+        height:'45%', 
+        textAlign:'center'
+    },
+    dataTitle: {
+        fontSize:16, 
+        opacity:0.2
+    },
+    locationTitle: {
+        fontSize:34, 
+        fontWeight:'500', 
+        textAlign:'center', 
+        marginBottom:8
+    },
     mapContainer: {
-        height: 260,
-        width: '100%',
-        marginBottom: 10,
+        height: 210, 
+        width:'100%', 
+        paddingVertical:4, 
+        paddingHorizontal:12, 
     },
-    map: {
-        height: '100%',
-        width: '100%',
-        borderRadius: 12,
-    },
-    paddingHorizontal:{
-        paddingHorizontal: 12,
-    },
-    title: {
-        fontSize: 30,
-        fontWeight: 'bold',
-    },
-    description: {
-        fontSize: 20,
-    }
+
 });
 
 

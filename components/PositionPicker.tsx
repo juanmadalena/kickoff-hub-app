@@ -1,23 +1,37 @@
-import { Image, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { useEffect, useState } from 'react';
+import { Image, StyleSheet, TouchableOpacity, Animated, View } from 'react-native';
 
-import { Text, View, Button } from './Themed';
-import { commonStyles } from '@/styles/authStyle';
+import { Text, useThemeColor } from './Themed';
+import Icon from './Icon';
+import { Position } from '@/interfaces';
 
-const PositionPicker = ({ onSelectPosition, position } : any) => {
+interface Props {
+    onSelectPosition: (position: string) => void;
+    position: Position;
 
-    const [positionSelected, setPositionSelected] = useState(position);
+}
+
+const PositionPicker = ({ onSelectPosition, position } : Props) => {
+
+    //Get theme
+    // const theme = useColorScheme() ?? 'light';
+    const theme = 'dark'
+
+    const backgroundColorSelection = useThemeColor({}, 'selectionBackground');
+    const primaryColor = useThemeColor({}, 'primaryColor');
+
+    const [positionSelected, setPositionSelected] = useState<Position>(position);
     const scaleAnimation = new Animated.Value(1);
 
     useEffect(() => {
         Animated.timing(scaleAnimation, {
-            toValue: 1.1,
+            toValue: 1.05,
             duration: 300,
             useNativeDriver: true,
         }).start();
     }, [positionSelected])
 
-    const handleSelection = ( v: string ) => {
+    const handleSelection = ( v: Position ) => {
         setPositionSelected(v);
     }
     
@@ -26,23 +40,28 @@ const PositionPicker = ({ onSelectPosition, position } : any) => {
     }
 
     const POSITIONS = [
-        { name: 'Goalkeeper', value: 'GK', image: require('../assets/images/positions/goalkeeper-light.png') },
-        { name: 'Defense', value: 'DF', image: require('../assets/images/positions/defense-light.png') },
-        { name: 'Midfielder', value: 'MF', image: require('../assets/images/positions/midfielder-light.png') },
-        { name: 'Striker', value: 'ST', image: require('../assets/images/positions/striker-light.png') },
+        { name: 'Goalkeeper', value: "GK", image: require(`../assets/images/positions/${theme}/goalkeeper.png`) },
+        { name: 'Defense', value: "DF", image: require(`../assets/images/positions/${theme}/defense.png`) },
+        { name: 'Midfielder', value: "MF", image: require(`../assets/images/positions/${theme}/midfielder.png`) },
+        { name: 'Forward', value: "ST", image: require(`../assets/images/positions/${theme}/striker.png`) },
     ]
 
     const selectedStyles = {
         transform: [{ scale: scaleAnimation }],
         borderRadius: 8,
-        backgroundColor: 'rgba(0,0,0,0.04)',
+        backgroundColor: `${backgroundColorSelection}AA`,
         ...styles.animationContainer
     }
 
     return (
         <View style={{flex:1, justifyContent:'space-between', flexDirection:'column'}}>
-            <View style={{flexDirection:'row', alignItems:'center', marginVertical:10}}>
+            <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-between', paddingHorizontal:8}}>
                 <Text style={{fontSize: 20, fontWeight: '500'}}>Select your position</Text>
+                <View style={[styles.buttonContainer]}>
+                    <TouchableOpacity disabled={!positionSelected} onPress={close} style={[styles.button, {backgroundColor: !positionSelected ? `${backgroundColorSelection}7F` : primaryColor}]}>
+                        <Icon name='arrow-forward-ios' size={18} color='white' style={{ opacity: !positionSelected ? 0.2 : 1}}/>
+                    </TouchableOpacity>
+                </View>
             </View>
             <View style={styles.container}>
                 {
@@ -51,9 +70,9 @@ const PositionPicker = ({ onSelectPosition, position } : any) => {
                             style={styles.positionContainer} 
                             key={index}
                             activeOpacity={0.7}    
-                            onPress={ () => handleSelection(pos.value)}
+                            onPress={ () => handleSelection(pos.value as Position)}
                         >
-                            <Animated.View style={ positionSelected === pos.value ? selectedStyles : styles.animationContainer }>
+                            <Animated.View style={ [positionSelected === pos.value ? selectedStyles : styles.animationContainer] }>
                                 <Image
                                     source={pos.image}
                                     style={styles.positionImage}
@@ -62,15 +81,6 @@ const PositionPicker = ({ onSelectPosition, position } : any) => {
                             </Animated.View>
                         </TouchableOpacity>
                     ))
-                }
-            </View>
-            <View style={styles.buttonContainer}>
-                {
-                    positionSelected && (
-                        <Button style={{width:'35%', height:40, padding:5}} onPress={close}>
-                            <Text style={commonStyles.buttonText}> Done </Text>
-                        </Button>
-                    )
                 }
             </View>
         </View>
@@ -91,7 +101,7 @@ const styles = StyleSheet.create({
         width:'48%',
         padding:10,
         justifyContent:'space-around',
-        borderRadius: 10,   
+        borderRadius: 10,
     },
     positionSelected:{
         shadowColor: '#000',
@@ -106,6 +116,7 @@ const styles = StyleSheet.create({
     },
     animationContainer:{
         flex:1,
+        padding: 10,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -115,15 +126,23 @@ const styles = StyleSheet.create({
         objectFit: 'contain'
     },
     positionText:{
+        marginTop: 8,
         textAlign: 'center',
         fontSize:14,
-        fontWeight: '400'
+        fontWeight: '300'
     },
     buttonContainer:{
-        height: 60,
-        alignItems: 'flex-end',
-        justifyContent: 'center',
+        height:45, 
+        width:45,  
     },
+    button: {
+        flex:1,
+        width:'100%',
+        paddingLeft:2,
+        borderRadius:100, 
+        alignItems:'center', 
+        justifyContent:'center'
+    }
 });
 
 

@@ -1,17 +1,17 @@
-import { ErrorResponse, User } from "@/interfaces";
+import { ErrorResponse, Player } from "@/interfaces";
 
 export interface AuthState {
     error: ErrorResponse | null;
     status: 'checking' | 'authenticated' | 'not-authenticated';
     token: string | null;
-    user: User | null;
+    user: Player | null;
 }
 
 export type AuthAction =
     | { type: 'addError', payload: object}
     | { type: 'removeError' }
-    | { type: 'login', payload: { token: string, user: User } }
-    | { type: 'register', payload: { token: string, user: User } }
+    | { type: 'login', payload: { token: string, user: Player } }
+    | { type: 'register', payload: { token: string, user: Player } }
     | { type: 'notAuthenticated' }
     | { type: 'logout' }
 

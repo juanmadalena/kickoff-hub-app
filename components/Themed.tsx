@@ -1,15 +1,17 @@
-import { Text as DefaultText, View as DefaultView, useColorScheme, TextInput as DefaultTextInput, TouchableOpacity as DefaultTouchableOpacity, ActivityIndicator  } from 'react-native';
+import { Text as DefaultText, View as DefaultView, useColorScheme, TextInput as DefaultTextInput, TouchableOpacity as DefaultTouchableOpacity, ActivityIndicator, Animated, NativeSyntheticEvent, TextInputChangeEventData  } from 'react-native';
 
 import Colors from '@/constants/Colors';
+import useTranslatePosition from '@/hooks/useTranslatePosition';
+import { useEffect } from 'react';
 
-type ThemeProps = {
+export type ThemeProps = {
   lightColor?: string;
   darkColor?: string;
 };
 
 export type TextProps = ThemeProps & DefaultText['props'];
 export type ViewProps = ThemeProps & DefaultView['props'] & { innerRef?: any };
-export type TextInputProps = ThemeProps & DefaultTextInput['props'] & { innerRef?: any, error?: boolean};
+export type TextInputProps = ThemeProps & DefaultTextInput['props'] & { innerRef?: any, error?: boolean, containerStyle?:  DefaultView['props']['style'] };
 export type ButtonProps = ThemeProps & DefaultTouchableOpacity['props'] & { loading?: boolean };;
 
 export function useThemeColor(
@@ -56,10 +58,31 @@ export function Button(props: ButtonProps ) {
 }
 
 export function TextInput(props: TextInputProps) {
-  const { error, style, lightColor, darkColor, innerRef = null, ...otherProps } = props;
+  const { error, style, lightColor, darkColor, containerStyle, innerRef = null, value = '', ...otherProps } = props;
+  //colors
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'itemBackground');
+  const primaryColor = useThemeColor({}, 'primaryColor');
+
+  //error style
   const errorStyle = error ? {borderColor: 'red', borderWidth:1} : {};
 
-  return <DefaultTextInput ref={innerRef} style={[{ color, backgroundColor, borderRadius: 5, height: 50, padding:10, fontSize:16, marginBottom: 15 }, style, errorStyle]} underlineColorAndroid={'transparent'} placeholderTextColor={'grey'} {...otherProps} />
+  //animation
+  const { position, animationIn, animationOut } = useTranslatePosition(props.value ? 0 : 40);
+    
+    useEffect(() => {
+      if(value.length > 0){
+        animationIn();
+      }
+      return () => {
+        animationOut();
+      }
+    }, [value])
+
+  return(
+    <DefaultView style={[{marginBottom: 4, width:'100%'}, containerStyle]}>
+      <Animated.Text style={{fontSize: 14, fontWeight:'500', marginBottom: 2, marginLeft:1, opacity: 0.5, color, transform:[{translateY:position}]}}>{props.placeholder}</Animated.Text>
+      <DefaultTextInput value={value} ref={innerRef} selectionColor={primaryColor} style={[{ color, backgroundColor, borderRadius: 6, height: 50, padding:10, fontSize:16 }, style, errorStyle]} underlineColorAndroid={'transparent'} placeholderTextColor={'grey'} {...otherProps} />
+    </DefaultView>
+  ) 
 }

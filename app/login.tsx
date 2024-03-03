@@ -3,7 +3,7 @@ import { Animated, Keyboard, KeyboardAvoidingView, Platform, TouchableWithoutFee
 import { useRouter } from 'expo-router';
 
 import LogoImage from '@/components/LogoImage';
-import { View, Text, TextInput, Button } from '@/components/Themed';
+import { View, Text, Button, TextInput } from '@/components/Themed';
 import { AuthContext } from '@/context/authContext/AuthContext';
 import { useFade } from '@/hooks/useFade';
 import { useForm } from '@/hooks/useForm';
@@ -28,6 +28,8 @@ const login = () => {
     const { email, password, onChange } = useForm<loginForm>({
         email: 'juanmadalena06@gmail.com',
         password: '12345678' 
+        // email: '',
+        // password: '' 
     });
 
     //Effect to fade in the form
@@ -43,11 +45,19 @@ const login = () => {
         }
     }, [status])
 
+    //If there is an error, stop the loading
+    useEffect(() => {
+        if(error !== null){
+            setLoading(false);
+        }
+    }, [error])
+
     const navigateToRegister = () => {
         fadeOut(100, () => router.replace('/register'))
     }
 
     const handleLogin = async () => {
+        setLoading(true);
         Keyboard.dismiss();
         login({ email: email, password })
     }
@@ -65,7 +75,7 @@ const login = () => {
                         <Text style={commonStyles.subtitle}>Please fill the form to create an account</Text>
                     </View>
                         {/* Form */}
-                        <View style={commonStyles.formContainer}>
+                        <View style={[commonStyles.formContainer, {height:'72%'}]}>
 
                             <TextInput
                                 placeholder="Email"
@@ -89,7 +99,7 @@ const login = () => {
 
 
                             {/* Button to submit */}
-                            <Button disabled={loading} loading={loading} onPress={handleLogin}>
+                            <Button style={{marginTop:18}} disabled={loading} loading={loading} onPress={handleLogin}>
                                 <Text style={commonStyles.buttonText}>Login</Text>
                             </Button>
                             
