@@ -33,8 +33,6 @@ export const useMatches = (date: string) => {
     }
 }
 
-
-
 export const useMatchesPlayed = ( ) => {
     
         const matchesPlayedQuery = useQuery({

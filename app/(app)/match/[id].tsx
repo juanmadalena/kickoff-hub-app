@@ -77,6 +77,9 @@ const Match = () => {
     return (
         <>
             <TopBarNavigator />
+            {/* <Button onPress={() => router.navigate({pathname:'/(app)/match/matchModal', params:{id}})}>
+                <Text>Match</Text>
+            </Button> */}
             <View style={{flex:1}}>
                     {
                         matchQuery.isLoading ?
@@ -194,7 +197,7 @@ const Match = () => {
                                                 }
                                             </DefaultView>
                                             :
-                                            <DefaultView style={{justifyContent:'space-between', backgroundColor:'transparent', flex:1, paddingBottom:20}}>
+                                            <DefaultView style={{justifyContent:'space-between', backgroundColor:'transparent', flex:1, paddingVertical:4, paddingHorizontal:4}}>
                                                 <DefaultView style={{backgroundColor:'transparent', width:'100%', alignItems:'flex-end'}}>
                                                     <TouchableOpacity onPress={() => setShowModal(false)} style={{borderRadius:20, backgroundColor:backgroungColor, opacity:0.4, padding:2}}>
                                                         <Icon name={"close"} style={{opacity:0.4}} />

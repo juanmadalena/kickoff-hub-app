@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet } from 'react-native';
 
 import { View, Text } from '@/components/Themed';
 import DatePicker from '@/components/DatePicker';
@@ -53,29 +53,20 @@ const index = () => {
                 isLoading ? 
                 <LoadingComponent/>
                 :
-                
-                data?.matches?.length === 0 || isError ?
-                <View style={{height:'40%', alignContent:'center', justifyContent:'center'}}>
-                    <Text style={{textAlign:'center', fontSize: 16, fontWeight: '600'}}>
-                        No matches found😔
-                    </Text>
-                </View>
-                :
                 <FlatList
+                    refreshControl={<RefreshControl refreshing={false} onRefresh={refetch}/>}
                     data={data?.matches}
-                    renderItem={({item}) => <MatchItem  match={item}/>}
+                    renderItem={({item}) => <MatchItem match={item} />}
                     keyExtractor={(_, index) => index.toString()}
                     showsVerticalScrollIndicator={false}
                     style={styles.matchesList}
+                    ListEmptyComponent={ 
+                        <Text style={{textAlign:'center', fontSize: 16, fontWeight: '600', marginTop:'40%'}}> 
+                            No matches found😔 
+                        </Text>
+                    }
                 />
             }
-            <View style={{position: 'absolute', bottom:0, width: '100%', backgroundColor:'transparent', justifyContent:'center', alignContent:'center', alignItems:'center'}}>
-                {/* <View > */}
-                    {/* <Text style={{padding:12, borderWidth:1, textAlign:'center', width:120, backgroundColor:'teal', borderRadius:12, color:'white'}}>
-                        New Match
-                    </Text> */}
-                {/* </View> */}
-            </View>
         </View>
     );
 };

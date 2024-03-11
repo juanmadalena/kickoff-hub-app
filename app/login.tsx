@@ -9,6 +9,7 @@ import { useFade } from '@/hooks/useFade';
 import { useForm } from '@/hooks/useForm';
 import { commonStyles } from '@/styles/authStyle'
 import useKeyboardActive from '@/hooks/useKeyboardActive';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface loginForm {
     email: string;
@@ -23,6 +24,7 @@ const login = () => {
     const { login, error, status, removeError } = useContext( AuthContext )
     const { fadeIn, fadeOut, opacity } = useFade();
     const { keyboardActive } = useKeyboardActive();
+    const { bottom } = useSafeAreaInsets();
 
     //Form state
     const { email, password, onChange } = useForm<loginForm>({
@@ -65,7 +67,7 @@ const login = () => {
     return(
         <>
         <LogoImage />
-        <KeyboardAvoidingView style={commonStyles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={150}>
+        <KeyboardAvoidingView style={[commonStyles.container]} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={150}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss} >
                 <Animated.View style={{...commonStyles.innerContainer, opacity}}>
                      
@@ -114,7 +116,7 @@ const login = () => {
         {
             // Hide link when keyboard is active
             !keyboardActive && (
-                <Animated.View style={{opacity}}>
+                <Animated.View style={{opacity, marginBottom: bottom + 20}}>
                     <Text style={{textAlign:'center', color: '#005B41', fontWeight: '600'}} onPress={navigateToRegister}>Create an account</Text>
                 </Animated.View>
             )

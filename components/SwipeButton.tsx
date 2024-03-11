@@ -49,7 +49,7 @@ const SwipeButton = ( { onSwiped, type }: SwipeButtonProps ) => {
     const containerColor = useRef(new Animated.Value(0)).current;
 
     // custom hook for arrow bounce animation
-    const BOUNCE = type === 'join' ? 2.5 : 0;
+    const BOUNCE = type === 'join' ? 3.5 : 0;
     const { transformX } = useBounce(BOUNCE, 500);
 
     // swipe button width

@@ -87,7 +87,9 @@ export const AuthProvider = ({ children }:any) => {
     }
     const login = async ({ email, password }: LoginData) => {
         try{
+            console.log('login')
             const { data } = await api.post<LoginResponse>('/auth/login', { email, password });
+            console.log(data)
             SecureStore.setItemAsync('token', data.token);
             
             return dispatch({
@@ -100,6 +102,7 @@ export const AuthProvider = ({ children }:any) => {
             
         }
         catch(err: any){
+            console.log(err)
             if(err.isAxiosError){
                 return dispatch({
                     type: 'addError',

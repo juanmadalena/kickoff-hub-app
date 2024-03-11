@@ -1,10 +1,11 @@
-import { SafeAreaView, useColorScheme } from 'react-native';
-import { Slot } from 'expo-router';
+import { useColorScheme } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-
-import { AuthProvider } from '@/context/authContext/AuthContext';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import Colors from '@/constants/Colors';
+import { Slot } from 'expo-router';
+
+import { View } from '@/components/Themed';
+import { AuthProvider } from '@/context/authContext/AuthContext';
 
 const queryClient = new QueryClient();
 
@@ -20,15 +21,14 @@ const AppContext = ({children}: { children: JSX.Element | JSX.Element[]}) => {
 
 export default function Root() {
     const colorScheme = useColorScheme();
-
-    const background = Colors[colorScheme ?? 'light'].background;
+    const { top } = useSafeAreaInsets();
     
     return (
         <AppContext>
             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <SafeAreaView style={{backgroundColor: background, flex: 1}} >
+                <View style={{paddingTop:top + 10, flex:1}}>
                     <Slot />
-                </SafeAreaView>
+                </View>
             </ThemeProvider>
         </AppContext>
     );

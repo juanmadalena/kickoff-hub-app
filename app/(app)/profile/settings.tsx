@@ -60,8 +60,6 @@ const settings = () => {
                 handleModalLoadingClose()
             }
 
-            
-
         }).catch( (error) => {
             console.log(error)
         })
@@ -76,7 +74,7 @@ const settings = () => {
             <View style={[styles.container]}>
                 <View style={[styles.imageContainer]}>
                     <View>
-                        <ProfilePicture uri={user?.photo} height={100} width={100} />
+                        <ProfilePicture uri={user?.photo} height={100} width={100} allowFullScreen />
                         <TouchableOpacity 
                             onPress={() =>handleImagePicker()}
                             style={{height:30, width:30, alignItems:'center', justifyContent:'center', position:'absolute', bottom:0, right:0, paddingLeft:1, backgroundColor:itemBackground, borderRadius:50}}

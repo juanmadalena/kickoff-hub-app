@@ -8,7 +8,7 @@ const Map = ( props: MapProps ) => {
     const { initialRegion, style, markers} = props;
 
     return (
-        <MapView initialRegion={initialRegion} style={style ?? styles.defaultStyle} maxDelta={0.1} minDelta={0.01} mapType="standard" scrollEnabled={false}>
+        <MapView initialRegion={initialRegion} style={style ?? styles.defaultStyle} maxDelta={0.01} minDelta={0.001} mapType="standard">
             {markers?.map( marker => (
                 <Marker
                     key={marker.latitude + marker.longitude}

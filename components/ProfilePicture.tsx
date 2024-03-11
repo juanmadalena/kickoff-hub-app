@@ -15,22 +15,21 @@ interface Props {
 
 const ProfilePicture = ({ uri, height = 50, width = 50, player, allowFullScreen = false }: Props) => {
 
-    const [ showFullScreen, setShowFullScreen ] = useState(false)
+    const [ showFullScreen, setShowFullScreen ] = useState<boolean>(false)
+
     const { height: heightScreen, width: widthScreen } = Dimensions.get('screen');
+
+    const { user } = useContext( AuthContext )
 
     let initials: string;
     
     if(player){
         initials = `${player.first_name?.charAt(0).toUpperCase()}${player.last_name?.charAt(0).toUpperCase()}`;
     }else{
-        const { user } = useContext( AuthContext )
         initials = `${user?.first_name?.charAt(0).toUpperCase()}${user?.last_name?.charAt(0).toUpperCase()}`;
     }
     
-    useFocusEffect(() => {
-        setShowFullScreen(false)
-    })
-
+    // handle photo full screen
     const handleFullScreen = () => {
         if(!allowFullScreen) return
         setShowFullScreen(!showFullScreen)

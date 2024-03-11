@@ -5,6 +5,7 @@ import Icon from './Icon';
 import { MaterialIcons } from '@expo/vector-icons';
 
 interface topBarNavigatorProps {
+    goBackAction?: () => void;
     icon?: React.ComponentProps<typeof MaterialIcons>['name'];
     iconSize?: number;
     disabled?: boolean;
@@ -12,15 +13,19 @@ interface topBarNavigatorProps {
     action?: () => void;
 }
 
-const TopBarNavigator = ( {icon, iconSize, activeColor = false, disabled = false, action } : topBarNavigatorProps) => {
+const TopBarNavigator = ( {icon, iconSize, activeColor = false, disabled = false, action, goBackAction } : topBarNavigatorProps) => {
 
     const router = useRouter()
     const backgroundColor = useThemeColor({}, 'itemBackground');
     const primaryColor = useThemeColor({}, 'primaryColor');
+    
+    const handleGoBack = () => {
+        goBackAction ? goBackAction() : router.back();
+    }
 
     return (
         <View style={[styles.container]}>
-            <TouchableOpacity style={[styles.backContainer, {backgroundColor}]} onPress={() => router.back()}>
+            <TouchableOpacity style={[styles.backContainer, {backgroundColor}]} onPress={handleGoBack}>
                 <Icon name='arrow-back' size={24} />
             </TouchableOpacity>
             {

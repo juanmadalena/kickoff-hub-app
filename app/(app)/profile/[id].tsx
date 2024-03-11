@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Text as DText } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { Text, useThemeColor } from '@/components/Themed';
@@ -8,6 +8,7 @@ import { AuthContext } from '@/context/authContext/AuthContext';
 import ProfilePicture from '@/components/ProfilePicture';
 import { usePlayerDetails } from '@/hooks/usePlayerDetails';
 import MatchItem from '@/components/MatchItem';
+import LoadingComponent from '@/components/LoadingComponent';
 
 const profileDetail = () => {
 
@@ -29,6 +30,14 @@ const profileDetail = () => {
         })
     }
 
+    if(isLoading){
+        return(
+            <View style={[styles.container, {flex:1, justifyContent:'center', alignItems:'center'}]}>
+                <LoadingComponent />
+            </View>
+        )
+    }
+
     return (
         <>
             <TopBarNavigator icon={isUser ? 'settings': undefined} iconSize={20} action={navigateToSettings}/>
@@ -45,19 +54,25 @@ const profileDetail = () => {
                 <View style={[styles.dataContainer]}>
                     <View style={[styles.dataBox, {backgroundColor}]}>
                         <Text style={[styles.dataTitle]}>Played</Text>
-                        <Text adjustsFontSizeToFit style={[styles.dataText]}>{ data?.matchesPlayed.count.padStart(2, '0') }</Text>
+                        <View style={[styles.dataTextContainer]}>
+                            <Text adjustsFontSizeToFit numberOfLines={1} style={[styles.dataText]}>{ data?.matchesPlayed.count.padStart(2, '0') }</Text>
+                        </View>
                         <Text></Text>
                     </View>
 
                     <View style={[styles.dataBox, {backgroundColor}]}>
                         <Text style={[styles.dataTitle]} adjustsFontSizeToFit>Organized</Text>
-                        <Text adjustsFontSizeToFit style={[styles.dataText]}>{ data?.matchesOrganized.count.padStart(2, '0') }</Text>
+                        <View style={[styles.dataTextContainer]}>
+                            <Text adjustsFontSizeToFit numberOfLines={1} style={[styles.dataText]}>{ data?.matchesOrganized.count.padStart(2, '0') }</Text>
+                        </View>
                         <Text></Text>
                     </View>
 
                     <View style={[styles.dataBox, {backgroundColor}]}>
                         <Text style={[styles.dataTitle]}>Rating</Text>
-                        <Text adjustsFontSizeToFit style={[styles.dataText]}>{data?.user.rating ?? '0.0'}</Text>
+                        <View style={[styles.dataTextContainer]}>
+                            <Text adjustsFontSizeToFit style={[styles.dataText]}>{data?.user.rating ?? '0.0'}</Text>
+                        </View>
                         <Text></Text>
                     </View>
                 </View>
@@ -117,10 +132,14 @@ const styles = StyleSheet.create({
         textAlign:'center',
         paddingTop:2
     },
-    dataText: {
-        fontSize:120,
+    dataTextContainer: {
         width:'100%', 
-        height:'45%', 
+        height:'55%', 
+        alignItems:'center', 
+        justifyContent:'center'
+    },
+    dataText: {
+        fontSize:120, 
         textAlign:'center'
     },
 });

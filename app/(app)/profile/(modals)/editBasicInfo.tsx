@@ -1,4 +1,4 @@
-import { Alert, View, TextInput as DefaultTexInput, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
+import { Alert, View, TextInput as DefaultTexInput, Keyboard, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, TouchableOpacity } from 'react-native';
 import { TextInput, Text, View as ViewThemed } from '@/components/Themed';
 import TopBarNavigator from '@/components/TopBarNavigator';
 import { useForm } from '@/hooks/useForm';
@@ -42,14 +42,14 @@ const editBasicInfo = () => {
     //Effect to enable the button when the user changes the first or last name
     useEffect(() => {
         if(
-            (firstName !== user?.first_name || lastName !== user?.last_name || position != user?.position) ||
+            (firstName !== user?.first_name || lastName !== user?.last_name || position != user?.position) &&
             (firstName.trim() !== '' && lastName.trim() !== '' && position.trim() !== '')
         ){
             setButtonDisabled(false);
         }else{
             setButtonDisabled(true);
         }
-    }, [firstName, lastName])
+    }, [firstName, lastName, position])
 
     const handleUpdateInfo = async () => {
         Keyboard.dismiss();
@@ -101,18 +101,21 @@ const editBasicInfo = () => {
                             />
                         </View>
                         <View>
-                            <TextInput
-                                placeholder='Position'
-                                containerStyle={{marginTop: 8}}
-                                value={position}
-                                enablesReturnKeyAutomatically={false}
-                                onTouchStart={() => Keyboard.dismiss()}
-                                onTouchEnd={() => setShowPositionModal(true)}
-                                editable={false}
-                            />
+                            <TouchableOpacity activeOpacity={1} onPressIn={() => Keyboard.dismiss()} onPressOut={() => setShowPositionModal(true)}>
+                                <TextInput
+                                    placeholder='Position'
+                                    containerStyle={{marginTop: 8}}
+                                    value={position}
+                                    enablesReturnKeyAutomatically={false}
+                                    onTouchStart={() => Keyboard.dismiss()}
+                                    onTouchEnd={() => setShowPositionModal(true)}
+                                    editable={false}
+                                    inputMode='none'                                  
+                                    />
+                            </TouchableOpacity>
                         </View>
                         <Text style={{opacity:0.5, paddingLeft:4, marginTop:8}}>
-                            Change your basic information {position}
+                            Change your basic information
                         </Text>
                     </View>
                 </ViewThemed>

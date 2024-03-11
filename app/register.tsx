@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, Animated, TextInput as DefaultTexInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, Animated, TextInput as DefaultTextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import BottomModal from '@/components/BottomModal';
@@ -11,6 +11,8 @@ import { useFade } from '@/hooks/useFade';
 import { useForm } from '@/hooks/useForm';
 import useKeyboardActive from '@/hooks/useKeyboardActive';
 import { commonStyles } from '@/styles/authStyle'
+import { Position } from '@/interfaces';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface RegisterForm {
     firstName: string;
@@ -23,14 +25,15 @@ interface RegisterForm {
 const register = () => {
 
     // Refs
-    const lastNameRef = useRef<DefaultTexInput | null>(null)
-    const emailRef = useRef<DefaultTexInput | null>(null)
-    const passwordRef = useRef<DefaultTexInput | null>(null)
-    const positionRef = useRef<DefaultTexInput | null>(null)
+    const lastNameRef = useRef<DefaultTextInput | null>(null)
+    const emailRef = useRef<DefaultTextInput | null>(null)
+    const passwordRef = useRef<DefaultTextInput | null>(null)
+    const positionRef = useRef<DefaultTextInput | null>(null)
 
     const { register, status, error, removeError } = useContext(AuthContext);
     const [ showModal, setShowModal ] = useState(false);
     const [ loading, setLoading ] = useState(false);
+    const { bottom } = useSafeAreaInsets();
 
     const { fadeIn, fadeOut, opacity } = useFade();
 
@@ -187,7 +190,7 @@ const register = () => {
                                         modalHeight={450}
                                     >
                                         <PositionPicker
-                                            position={position}
+                                            position={position as Position}
                                             onSelectPosition={handleSelection}
                                         />
                                     </BottomModal>
@@ -209,7 +212,7 @@ const register = () => {
         {
             // Hide link when keyboard is active, because it cause some problems on android
             !keyboardActive && (
-                <Animated.View style={{opacity}}>
+                <Animated.View style={{opacity, marginBottom: bottom + 20}}>
                     <Text style={{textAlign: 'center', color: 'grey', fontSize: 16}}>Already have an account? <Text style={{color: '#005B41', fontWeight: '600'}} onPress={navigateToLogin}>Login</Text></Text>
                 </Animated.View>
             )
