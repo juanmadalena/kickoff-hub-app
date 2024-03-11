@@ -9,12 +9,13 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
 interface AddressInputProps {
+    value: string;
     onChangeAddress: (location: string) => void;
 }
 
-const AddressInput = ( { onChangeAddress }: AddressInputProps ) => {
+const AddressInput = ( { value, onChangeAddress }: AddressInputProps ) => {
 
-    const [ location, setLocation ] = useState<string>();
+    const [ location, setLocation ] = useState<string>(value);
     const [ showSuggestions, setShowSuggestions ] = useState(false)
 
     const inputRef = useRef<DefaultTextInput | null>(null);

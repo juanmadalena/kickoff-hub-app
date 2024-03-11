@@ -8,13 +8,14 @@ type BottomModalProps = Modal['props'] & {
     duration?: number;
     children: React.ReactNode;
     modalHeight?: number | "auto" | Animated.Value | `${number}%` | Animated.AnimatedInterpolation<string | number> | Animated.WithAnimatedObject<Animated.AnimatedNode>  | undefined;
+    modalBackground?: string;
     allowDragDownToClose?: boolean;
     setVisible?: () => void;
 }
 
 const BottomModal = ( props : BottomModalProps ) => {
     
-    const { visible = true, children, modalHeight = '35%', duration = 300, allowDragDownToClose = false, setVisible, ...otherProps } = props as BottomModalProps;
+    const { visible = true, children, modalHeight = '35%', duration = 300, allowDragDownToClose = false, modalBackground, setVisible, ...otherProps } = props as BottomModalProps;
     const { height } = Dimensions.get('screen');
 
     //Animation for the modal
@@ -73,7 +74,7 @@ const BottomModal = ( props : BottomModalProps ) => {
         <Modal {...otherProps}>
             <View style={styles.container}>
                 <Animated.View { ...allowDragDownToClose && {...panResponder.panHandlers}} style={{...styles.bottomContainer, height: modalHeight , transform: [{translateY:translateY}], zIndex:999}}>
-                    <View style={{ flex:1, borderRadius:25, paddingVertical:14 }}>
+                    <View style={[{ flex:1, borderRadius:25, paddingVertical:14 }, modalBackground ? { backgroundColor:modalBackground} : null ]}>
                         {
                          allowDragDownToClose &&   
                             <DefaultView style={{width:'100%', alignItems:'center', justifyContent:'center'}}>

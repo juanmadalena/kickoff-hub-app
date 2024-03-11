@@ -6,7 +6,6 @@ import { useMatchesOrganized } from '@/hooks/useMatches';
 import BottomModal from '@/components/BottomModal';
 import LoadingComponent from '@/components/LoadingComponent';
 import MatchItem from '@/components/MatchItem';
-import CreateUpdateMatch from '@/components/CreateUpdateMatch';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TopBarNavigator from '@/components/TopBarNavigator';
 import { useRouter } from 'expo-router';
@@ -42,11 +41,11 @@ const matchesOrganized = () => {
                     />
                 }
                 <DefaultView style={{position:'absolute', bottom: bottom + 10, left:'30%', right:'30%'}} >
-                    <Button style={{alignItems:'center', justifyContent:'space-between', flexDirection: 'row', height:40, borderRadius:40}} onPress={() => setShowNewMatchModal(true)} >
-                    {/* <Button style={{alignItems:'center', justifyContent:'space-between', flexDirection: 'row', height:40, borderRadius:40}} onPress={() => router.navigate({
-                        pathname:'/(app)/match/matchModal',
-                        params: { id: null }
-                        })} > */}
+                    {/* <Button style={{alignItems:'center', justifyContent:'space-between', flexDirection: 'row', height:40, borderRadius:40}} onPress={() => setShowNewMatchModal(true)} > */}
+                    <Button style={{alignItems:'center', justifyContent:'space-between', flexDirection: 'row', height:40, borderRadius:40}} onPress={() => router.navigate({
+                        pathname:'/(app)/(modals)/[matchModal]',
+                        params: { matchModal: false }
+                        })} >
                         <Text style={{ fontWeight:'600', textAlign:'center', flex:1, color:'white' }}>
                             New Match
                         </Text>
@@ -65,7 +64,6 @@ const matchesOrganized = () => {
                         allowDragDownToClose={true}
                     >
                         <TopBarNavigator goBackAction={() => console.log('epa')} icon='check' activeColor   />
-                        <CreateUpdateMatch />     
                     </BottomModal>
                 </>
             }

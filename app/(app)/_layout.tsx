@@ -53,7 +53,7 @@ function AppNav(){
                 <Stack.Screen name="(tabs)" options={{ header: () => <TopBarProfile/> }}/>
                 <Stack.Screen name="profile" options={{ headerShown: false }} />
                 <Stack.Screen name="match/[id]" options={{ headerShown: false }} />
-                {/* <Stack.Screen name="match/(modals)/[matchModal]" options={{ headerShown: false, presentation: 'modal', animation:'fade_from_bottom' }} /> */}
+                <Stack.Screen name="(modals)/[matchModal]" options={{ headerShown: false, animation:'fade_from_bottom', presentation:'modal' }} />
             </Stack>
         </>
     )

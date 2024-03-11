@@ -77,9 +77,9 @@ const Match = () => {
     return (
         <>
             <TopBarNavigator />
-            {/* <Button onPress={() => router.navigate({pathname:'/(app)/match/matchModal', params:{id}})}>
+            <Button onPress={() => router.navigate({pathname:'/(app)/(modals)/[matchModal]', params:{matchModal:id}})}>
                 <Text>Match</Text>
-            </Button> */}
+            </Button>
             <View style={{flex:1}}>
                     {
                         matchQuery.isLoading ?

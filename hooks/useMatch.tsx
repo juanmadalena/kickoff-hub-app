@@ -12,6 +12,7 @@ export const useMatch = (id: string) => {
     const matchQuery = useQuery({
         queryKey: ['matches/[id]', id],
         queryFn: () => getMatchById(id),
+        enabled: !!id,
     });
 
     return {
