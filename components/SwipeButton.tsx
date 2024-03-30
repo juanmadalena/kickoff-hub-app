@@ -1,7 +1,7 @@
-import { useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Dimensions, PanResponder, StyleSheet, View as DefaultView } from 'react-native';
 
-import { View, Text } from '@/components/Themed';
+import { Text, useThemeColor } from '@/components/Themed';
 import { useBounce } from '@/hooks/useBounce';
 import Icon from './Icon';
 
@@ -61,7 +61,7 @@ const SwipeButton = ( { onSwiped, type }: SwipeButtonProps ) => {
         onSwiped();
     }
 
-    const panResponder = useRef(
+    const panResponder = useMemo( () =>
         PanResponder.create({
           onStartShouldSetPanResponder: () => true,
           onPanResponderMove: (_event, gestureState) => {
@@ -92,7 +92,7 @@ const SwipeButton = ( { onSwiped, type }: SwipeButtonProps ) => {
               }).start();
           }
         })
-      ).current;
+      , [type])
 
     const swipeStyles = {
         transform: [
@@ -104,7 +104,7 @@ const SwipeButton = ( { onSwiped, type }: SwipeButtonProps ) => {
             }),
             },
         ],
-    };
+    }
 
     const backgroundStyles ={ 
         backgroundColor: containerColor.interpolate({
@@ -141,12 +141,11 @@ const SwipeButton = ( { onSwiped, type }: SwipeButtonProps ) => {
 const styles = StyleSheet.create({
   container: {
     position:'absolute', 
-    bottom:10, 
+    bottom:30, 
     left:20,
     width:'90%', 
     borderRadius:18, 
     padding:10,
-    backgroundColor: '#222222',
   },
   innerContainer: {
     flexDirection: 'row',
@@ -162,7 +161,6 @@ const styles = StyleSheet.create({
   placeholder: {
     position:'absolute', 
     textAlign:'center', 
-    color:'white', 
     fontSize:14, 
     fontWeight:'600', 
     width:'100%'

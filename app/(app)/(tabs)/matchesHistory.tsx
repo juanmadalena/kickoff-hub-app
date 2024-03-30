@@ -35,7 +35,7 @@ const matchesHistory = () => {
                         getItemLayout={(_, index) => ({length: 135, offset: 135 * index, index})}
                         renderSectionHeader={({section: {title}}) => (
                             <View>
-                                <Text style={{fontSize: 14, paddingLeft:10, paddingVertical:10, color:'grey', fontWeight: '600'}}>{formatDateToString(title)}</Text>
+                                <Text style={{fontSize: 14, paddingLeft:10, paddingVertical:10, color:'grey', fontWeight: '600'}}>{formatDateToString(title, 'dd/mm/yyyy')}</Text>
                             </View>
                         )}
                     />

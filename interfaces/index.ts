@@ -36,6 +36,7 @@ export interface Match {
     duration:    string;
     description: string;
     location:    string;
+    address:     string;
     latitude:    number;
     longitude:   number;
     price:       number;
@@ -96,6 +97,7 @@ export interface MatchesPlayedData {
     time:        string;
     duration:    string;
     location:    string;
+    address:     string;
     price:       number;
     num_players: number;
     min_players: number;

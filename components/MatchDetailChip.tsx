@@ -11,12 +11,12 @@ interface Props {
 
 const MatchDetailChip = ({ text, IconName, style }: Props) => {
 
-    const backgroundColor = useThemeColor({}, 'selectionBackground');
+    const backgroundColor = useThemeColor({}, 'secondaryColor');
 
     return (
-        <View style={[{...styles.container, backgroundColor}, style]} >
+        <View style={[{...styles.container, backgroundColor:`${backgroundColor}`}, style]} >
             {
-                IconName && <Icon name={IconName} size={14} style={{marginRight: 4}}/>
+                IconName && <Icon name={IconName} size={14} style={{marginRight: 4, color:'white'}}/>
             }
             <Text style={styles.text}>{text}</Text>
         </View>
@@ -29,13 +29,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         paddingVertical: 6,
         paddingHorizontal: 10,
-        backgroundColor: '#2a2a2a',
+        // backgroundColor: '#2a2a2a',
         borderRadius: 8,
         marginRight: 10,
     },
     text: {
         fontSize: 12,
         fontWeight: '600',
+        color:'white'
     }
 })
 

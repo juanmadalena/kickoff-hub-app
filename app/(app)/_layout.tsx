@@ -5,7 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 
 import { AuthContext } from '@/context/authContext/AuthContext';
 import { useFonts } from 'expo-font';
-import TopBarNavigator from '@/components/TopBarNavigator';
+// import TopBarNavigator from '@/components/TopBarNavigator';
 import TopBarProfile from '@/components/TopBarProfile';
 
 SplashScreen.preventAutoHideAsync();
@@ -37,8 +37,6 @@ export default function App(){
     if(status === 'authenticated'){
         return <AppNav />
     }
-
-
 }
 
 function AppNav(){

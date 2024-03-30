@@ -1,5 +1,7 @@
 const tintColorLight = '#2f95dc';
 const tintColorDark = '#fff';
+const primaryColor = '#005B41';
+const secondaryColor = '#004834';
 
 export default {
   light: {
@@ -7,20 +9,24 @@ export default {
     background: '#F2F2F2',
     itemBackground: '#E3E3E3',
     selectionBackground: '#c9c9c9',
-    primaryColor: '#196b54',
     tint: tintColorLight,
     tabIconDefault: '#ccc',
     tabIconSelected: tintColorLight,
+    primaryColor,
+    secondaryColor,
+    errorColor: '#ff0000',
   },
   dark: {
     text: '#fff',
     background: '#000000',
     itemBackground: '#141414',
     selectionBackground: '#2a2a2a',
-    primaryColor: '#005b41',
     tint: tintColorDark,
     tabIconDefault: '#ccc',
     tabIconSelected: tintColorDark,
+    primaryColor,
+    secondaryColor,
+    errorColor: '#ff0000',
   },
 };
 

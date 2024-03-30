@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { Animated, StyleSheet, TouchableOpacity } from 'react-native';
+import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
-import { View, Text, useThemeColor } from '@/components/Themed';
+import { Text, useThemeColor } from '@/components/Themed';
 import { useFade } from '@/hooks/useFade';
 import { Player } from '@/interfaces';
 import ProfilePicture from './ProfilePicture';
@@ -32,10 +32,12 @@ const PlayersList = ( {players, isOrganizer = false}: PlayersListProps ) => {
     }
 
     return (
-        <View style={[styles.transparentBackground]}>
+        <View style={[]}>
             {
                 players?.length === 0 ?
-                <Text>No players yet</Text>
+                <View style={{width:'100%', alignItems:'center', justifyContent:'center', height:40}}>
+                    <Text style={{opacity:0.4}}>No players yet</Text>
+                </View>
                 :
                 <Animated.View style={{opacity}}>
                     {
@@ -43,19 +45,19 @@ const PlayersList = ( {players, isOrganizer = false}: PlayersListProps ) => {
                             <TouchableOpacity 
                                 activeOpacity={0.7} 
                                 key={player.id} 
-                                style={[styles.transparentBackground, styles.playerContainer]}
+                                style={[styles.playerContainer]}
                                 onPress={() => navigateToPlayerDetails(player.id)}
                             >
-                                <View style={[styles.transparentBackground, styles.playerData]}>
+                                <View style={[styles.playerData]}>
                                     <ProfilePicture uri={player.photo} player={player} />
-                                    <View style={[styles.transparentBackground, styles.playerText]}>
+                                    <View style={[styles.playerText]}>
                                         <Text style={[styles.playerName]}>{player.first_name} {player.last_name}</Text>
                                         <Text style={[styles.playerPosition]}>{player.position}</Text>
                                     </View>
                                 </View>
-                                <View style={[styles.transparentBackground, styles.actionContainer]}>
+                                <View style={[styles.actionContainer]}>
                                     <View style={[styles.ratingContainer, {backgroundColor}]}>
-                                        <View style={[styles.transparentBackground]}>
+                                        <View style={[]}>
                                             <Text style={[styles.ratingText]}>
                                                 {player.rating || '0.0'}
                                             </Text>
@@ -64,7 +66,7 @@ const PlayersList = ( {players, isOrganizer = false}: PlayersListProps ) => {
                                     {
                                         isOrganizer &&
                                         <View style={[styles.removeContainer]}>
-                                            <View style={[styles.transparentBackground]}>
+                                            <View style={[]}>
                                                 <Icon name="close" size={20} color="red" />
                                             </View>
                                         </View>
@@ -80,9 +82,6 @@ const PlayersList = ( {players, isOrganizer = false}: PlayersListProps ) => {
 };
 
 const styles = StyleSheet.create({
-    transparentBackground: {
-        backgroundColor: 'transparent'
-    },
     playerContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',

@@ -9,6 +9,7 @@ const getPlayersByMatchId = async (id: string): Promise<PlayersResponse> => {
 }
 
 const joinMatch = async (idMatch: string, idUser: string) => {
+    console.log('joinMatch')
     const { data } =  await api.post(`/matches/${idMatch}/join`, {idMatch, idUser, position:'GK'});
     return data;
 }

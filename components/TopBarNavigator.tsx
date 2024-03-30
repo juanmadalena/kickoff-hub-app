@@ -1,5 +1,5 @@
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { useThemeColor } from '@/components/Themed';
+import { Text, useThemeColor } from '@/components/Themed';
 import { useRouter } from 'expo-router';
 import Icon from './Icon';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -11,9 +11,10 @@ interface topBarNavigatorProps {
     disabled?: boolean;
     activeColor?: boolean;
     action?: () => void;
+    title?: string;
 }
 
-const TopBarNavigator = ( {icon, iconSize, activeColor = false, disabled = false, action, goBackAction } : topBarNavigatorProps) => {
+const TopBarNavigator = ( {title, icon, iconSize, activeColor = false, disabled = false, action, goBackAction } : topBarNavigatorProps) => {
 
     const router = useRouter()
     const backgroundColor = useThemeColor({}, 'itemBackground');
@@ -28,6 +29,12 @@ const TopBarNavigator = ( {icon, iconSize, activeColor = false, disabled = false
             <TouchableOpacity style={[styles.backContainer, {backgroundColor}]} onPress={handleGoBack}>
                 <Icon name='arrow-back' size={24} />
             </TouchableOpacity>
+            {
+                title &&
+                <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
+                    <Text style={{fontSize:20, fontWeight:'bold'}}>{title}</Text>
+                </View>
+            }
             {
                 icon && 
                 <TouchableOpacity disabled={disabled} style={[styles.backContainer, {backgroundColor: activeColor && !disabled ? `${primaryColor}AA` : backgroundColor, opacity: disabled ? 0.4 : 1}]} onPress={action}>

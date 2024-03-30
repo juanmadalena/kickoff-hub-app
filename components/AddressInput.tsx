@@ -1,16 +1,14 @@
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { FlatList, View, TouchableOpacity, TextInput as DefaultTextInput, StyleSheet } from 'react-native';
 
 import { Text, useThemeColor } from '@/components/Themed';
 import { TextInput } from '@/components/Themed';
 import useDebouncer from '@/hooks/useDebouncer';
-import { useForm } from '@/hooks/useForm';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import { useLocationAutocomplete } from '@/hooks/useLocationAutocomplete';
 
 interface AddressInputProps {
     value: string;
-    onChangeAddress: (location: string) => void;
+    onChangeAddress: (location: string, address:string, id: string) => void;
 }
 
 const AddressInput = ( { value, onChangeAddress }: AddressInputProps ) => {
@@ -22,32 +20,15 @@ const AddressInput = ( { value, onChangeAddress }: AddressInputProps ) => {
 
     const backgroundColor = useThemeColor({}, 'itemBackground');
 
-    const { debouncedValue } = useDebouncer( location, 1000 )
+    const { debouncedValue } = useDebouncer( location, 600 )
 
-    const suggestions = useMemo( () => {
-        if(debouncedValue.trim() === '') return [];
-        if(!showSuggestions) return [];
+    const { autocompleteQuery: data } = useLocationAutocomplete({ query: debouncedValue });
 
-        const prediction = axios.get<AutocompleteResponse>(`https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${debouncedValue}&components=country:ie&key=AIzaSyBLA5y_dJmk_Bg6qdSdtxKNetNrQDgmOTY`)
-        .then( ({data}) => {
-            return data.predictions;
-        })
-
-        return prediction;
-
-    }, [debouncedValue])
-
-    const { data = [] } = useQuery({
-        queryKey: ['suggestions', suggestions],
-        queryFn: () => suggestions,
-        enabled: debouncedValue.trim() !== '' && showSuggestions
-    });
-
-    const handleSelection = (value: string) => {
+    const handleSelection = (location: string, address: string, id:string) => {
         inputRef.current?.blur();
-        setLocation(value);
+        setLocation(`${location}, ${address}`);
         setShowSuggestions(false);
-        onChangeAddress(value);
+        onChangeAddress(location, address, id);
     }
 
     return (
@@ -61,10 +42,10 @@ const AddressInput = ( { value, onChangeAddress }: AddressInputProps ) => {
                 onFocus={() => setShowSuggestions(true)}
             />
             {
-                showSuggestions && data.length > 0 &&
+                showSuggestions && data.data?.predictions && data.data?.predictions.length > 0 &&
                 (
                     <FlatList 
-                    data={data}
+                    data={data.data?.predictions || []}
                     style={[styles.listContainer, {backgroundColor}]}
                     keyboardShouldPersistTaps="always"
                     ListEmptyComponent={() => null}
@@ -73,7 +54,10 @@ const AddressInput = ( { value, onChangeAddress }: AddressInputProps ) => {
                             <TouchableOpacity 
                                 activeOpacity={0.8}
                                 style={[styles.suggestionButton]}
-                                onPress={() => handleSelection(`${item.structured_formatting.main_text} - ${item.structured_formatting.secondary_text}`)}>
+                                onPress={
+                                    () => 
+                                    handleSelection(item.structured_formatting.main_text, item.structured_formatting.secondary_text, item.place_id)
+                                }>
                                 <Text style={[styles.suggestionMainText]}>{item.structured_formatting.main_text}</Text>
                                 <Text style={[styles.suggestionSecondaryText]}>{item.structured_formatting.secondary_text}</Text>
                             </TouchableOpacity>

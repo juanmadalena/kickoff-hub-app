@@ -14,8 +14,7 @@ interface Props {
 const PositionPicker = ({ onSelectPosition, position } : Props) => {
 
     //Get theme
-    // const theme = useColorScheme() ?? 'light';
-    const theme = 'dark'
+    const imageColor = useThemeColor({}, 'text');
 
     const backgroundColorSelection = useThemeColor({}, 'selectionBackground');
     const primaryColor = useThemeColor({}, 'primaryColor');
@@ -40,10 +39,10 @@ const PositionPicker = ({ onSelectPosition, position } : Props) => {
     }
 
     const POSITIONS = [
-        { name: 'Goalkeeper', value: "GK", image: require(`../assets/images/positions/${theme}/goalkeeper.png`) },
-        { name: 'Defense', value: "DF", image: require(`../assets/images/positions/${theme}/defense.png`) },
-        { name: 'Midfielder', value: "MF", image: require(`../assets/images/positions/${theme}/midfielder.png`) },
-        { name: 'Forward', value: "ST", image: require(`../assets/images/positions/${theme}/striker.png`) },
+        { name: 'Goalkeeper', value: "GK", image: require(`../assets/images/positions/goalkeeper.png`)},
+        { name: 'Defense', value: "DF", image: require(`../assets/images/positions/defense.png`)},
+        { name: 'Midfielder', value: "MF", image: require(`../assets/images/positions/midfielder.png`)},
+        { name: 'Forward', value: "ST", image: require(`../assets/images/positions/striker.png`)},
     ]
 
     const selectedStyles = {
@@ -55,7 +54,7 @@ const PositionPicker = ({ onSelectPosition, position } : Props) => {
 
     return (
         <View style={{flex:1, justifyContent:'space-between', flexDirection:'column'}}>
-            <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-between', paddingHorizontal:8}}>
+            <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-between', paddingHorizontal:20, marginTop:2}}>
                 <Text style={{fontSize: 20, fontWeight: '500'}}>Select your position</Text>
                 <View style={[styles.buttonContainer]}>
                     <TouchableOpacity disabled={!positionSelected} onPress={close} style={[styles.button, {backgroundColor: !positionSelected ? `${backgroundColorSelection}7F` : primaryColor}]}>
@@ -74,6 +73,7 @@ const PositionPicker = ({ onSelectPosition, position } : Props) => {
                         >
                             <Animated.View style={ [positionSelected === pos.value ? selectedStyles : styles.animationContainer] }>
                                 <Image
+                                    tintColor={imageColor}
                                     source={pos.image}
                                     style={styles.positionImage}
                                 />
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
         textAlign: 'center',
         fontSize:14,
-        fontWeight: '300'
+        fontWeight: '500'
     },
     buttonContainer:{
         height:45, 

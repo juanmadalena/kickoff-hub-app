@@ -1,25 +1,26 @@
-import { View as DefaultView, ScrollView, StyleSheet, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
+import { useContext, useEffect, useState } from 'react';
+import { View as DefaultView, ScrollView, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 
-import { Button, Text, View, useThemeColor } from '@/components/Themed';
+import { Text, View, useThemeColor } from '@/components/Themed';
 import { useMatch } from '@/hooks/useMatch';
 import { formatDateToString } from '@/utils/formatDateToString';
 import ProfilePicture from '@/components/ProfilePicture';
 import SwipeButton from '@/components/SwipeButton';
-import BottomModal from '@/components/BottomModal';
-import { useContext, useEffect, useState } from 'react';
+// import BottomModal from '@/components/BottomModal';
 import { AuthContext } from '@/context/authContext/AuthContext';
 import { useJoinMatch, useLeaveMatch, usePlayers } from '@/hooks/usePlayers';
-import Icon from '@/components/Icon';
+// import Icon from '@/components/Icon';
 import PlayersList from '@/components/PlayersList';
 import Map from '@/components/Map';
 import { formatTimeDuration } from '@/utils/formatTimeDuration';
 import { checkIfMatchIsAvailable } from '@/utils/checkIfMatchIsAvailable';
-import MutationStatus from '@/components/MutationStatus';
+// import MutationStatus from '@/components/MutationStatus';
 import { sleep } from '@/utils/sleep';
 import LoadingComponent from '@/components/LoadingComponent';
 import TopBarNavigator from '@/components/TopBarNavigator';
+import ModalLoadingInfo from '@/components/ModalLoadingInfo';
 
 const Match = () => {
 
@@ -42,51 +43,56 @@ const Match = () => {
     const { joinMatchQuery } = useJoinMatch(id as string, user?.id! )
     const { leaveMatchQuery } = useLeaveMatch(id as string, user?.id! )
     
-    //State for the modal
-    const [ showModal, setShowModal ] = useState(false);
+    //State for the loading modal
+    const [ showLoadingInfo, setShowLoadingInfo ] = useState(false);
+    const [ statusLoading, setStatusLoading ] = useState<'success' | 'error' | 'loading'>('loading');
 
     //State for the swipe button
-    const [ swipeType, setSwipeType ] = useState<'join' | 'leave' | 'full' | 'disabled'>('join');
-    const [ isMutationGoing, setIsMutationGoing ] = useState<'joining' | 'leaving'>();
+    const [ swipeType, setSwipeType ] = useState<'join' | 'leave' | 'full' | 'disabled' | undefined >(undefined);
 
-    //Handle the mutation and close the modal
-    const handleMutation = async (mutation: any, action: 'joining' | 'leaving') => {
-        setIsMutationGoing(action)
-        await mutation.mutateAsync();
-        closeModal()
-    }
-        
     useEffect(() => {
         setSwipeType( checkIfMatchIsAvailable( matchQuery.data?.match , playersQuery.data?.players, user?.id! ) );
-    }, [playersQuery])
+    }, [playersQuery.data?.players, matchQuery.data?.match])
 
-    const resetMutations = () => {
-        joinMatchQuery.reset();
-        leaveMatchQuery.reset();
-    }
-
-    const closeModal = async () => {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        //Time so the user can see the success or error message
-        await sleep(1000);
-        setShowModal(false);
-        setIsMutationGoing(undefined);
-        resetMutations();
+    //Handle the mutation and show loading modal
+    const handleSwiped = async () => {
+        try{
+            setShowLoadingInfo(true)
+            if(swipeType === 'join') {
+                await joinMatchQuery.mutateAsync();
+            }
+            if(swipeType === 'leave') {
+                await leaveMatchQuery.mutateAsync();
+            }
+            setStatusLoading('success')
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+        }
+        catch(e){
+            setStatusLoading('error')
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+        }
+        finally{
+            await sleep(1000)
+            setShowLoadingInfo(false)
+            setStatusLoading('loading')
+        }
     }
 
     return (
         <>
             <TopBarNavigator />
-            <Button onPress={() => router.navigate({pathname:'/(app)/(modals)/[matchModal]', params:{matchModal:id}})}>
+            {/* <Button onPress={() => router.navigate({pathname:'/(app)/(modals)/[matchModal]', params:{matchModal:id}})}>
                 <Text>Match</Text>
-            </Button>
+            </Button> */}
             <View style={{flex:1}}>
                     {
                         matchQuery.isLoading ?
                         <LoadingComponent />
                         :
                         matchQuery.isError ?
-                        <Text>Error loading match</Text>
+                        <View style={{flex:1, alignItems:'center', justifyContent:'center'}}>
+                            <Text>Error loading match</Text>
+                        </View>
                         :
                         matchQuery.data &&
                         <>
@@ -95,14 +101,17 @@ const Match = () => {
                             <View style={[styles.container, { flexDirection:'column' }]}>
                                 <View style={[styles.dataContainer, {width:'100%', backgroundColor: backgroungColor}]}>
                                     <DefaultView style={[styles.mapContainer]}>
-                                        <Map initialRegion={{latitude: matchQuery.data?.match.latitude!, longitude: matchQuery.data?.match.longitude!, latitudeDelta: 0.0922, longitudeDelta: 0.0421 }} />
+                                        <Map 
+                                            initialRegion={{latitude: matchQuery.data?.match.latitude!, longitude: matchQuery.data?.match.longitude!, latitudeDelta: 0.0922, longitudeDelta: 0.0421 }} 
+                                            markers={[{latitude: matchQuery.data?.match.latitude!, longitude: matchQuery.data?.match.longitude!}]}
+                                        />
                                     </DefaultView>  
-                                    <DefaultView style={{marginTop:10, backgroundColor:'transparent', borderWidth:0, borderColor:'red', width:'100%'}}>
+                                    <DefaultView style={{marginVertical:10, backgroundColor:'transparent', borderWidth:0, borderColor:'red', width:'100%'}}>
                                         <Text style={[styles.locationTitle]}>
                                             {matchQuery.data?.match.location}
                                         </Text>
                                         <Text style={[styles.dataTitle, { paddingHorizontal:12, textAlign:'center' }]}>
-                                            97 Slievenamon Rd, Drimnagh, Dublin 12, D12 FX97
+                                            {matchQuery.data?.match.address}
                                         </Text>
                                     </DefaultView>
                                 </View>
@@ -132,7 +141,6 @@ const Match = () => {
                                     <Text></Text>
                                 </View>
                             </View>
-
                             {/* Players */}
                             <View style={[styles.container, { flexDirection:'column' }]}>
                                 <View style={[styles.dataContainer, {width:'100%', backgroundColor: backgroungColor}]}>
@@ -172,53 +180,15 @@ const Match = () => {
                             </TouchableWithoutFeedback>
                             <View style={{height:68}}></View>
                         </ScrollView>
-                        <SwipeButton 
-                            type={swipeType}
-                            onSwiped={() => setShowModal(true)} />
-                        <View>
-                            {
-                                showModal &&
-                                    <BottomModal 
-                                        duration={300}
-                                        transparent={true}
-                                        visible={showModal}
-                                        animationType='fade'
-                                        modalHeight={220}
-                                        setVisible={() => setShowModal(false)}
-                                    >
-                                        {
-                                            isMutationGoing ?
-                                            <DefaultView style={{position:'absolute', top:0, left:0, right:0, bottom:0, backgroundColor:'transparent', alignItems:'center', justifyContent:'center'}}>
-                                                {
-                                                    isMutationGoing === 'joining' ?
-                                                    <MutationStatus mutation={joinMatchQuery} successMessage={'Enjoy!!'} />
-                                                    : isMutationGoing === 'leaving' &&
-                                                    <MutationStatus mutation={leaveMatchQuery} successMessage={'See you soon'} />
-                                                }
-                                            </DefaultView>
-                                            :
-                                            <DefaultView style={{justifyContent:'space-between', backgroundColor:'transparent', flex:1, paddingVertical:4, paddingHorizontal:4}}>
-                                                <DefaultView style={{backgroundColor:'transparent', width:'100%', alignItems:'flex-end'}}>
-                                                    <TouchableOpacity onPress={() => setShowModal(false)} style={{borderRadius:20, backgroundColor:backgroungColor, opacity:0.4, padding:2}}>
-                                                        <Icon name={"close"} style={{opacity:0.4}} />
-                                                    </TouchableOpacity>
-                                                </DefaultView>
-                                                <Text style={{fontSize:24, textAlign:'center'}}>
-                                                    {swipeType === 'join' ? 'Join' : 'Leave'} the match? { swipeType === 'join' ? '⚽' : '😢' }
-                                                </Text>
-                                                <Button 
-                                                    onPress={() => handleMutation(swipeType === 'join'? joinMatchQuery : leaveMatchQuery, swipeType === 'join' ? 'joining' : 'leaving')}
-                                                    style={{marginTop:8, width:'100%'}}
-                                                >
-                                                    <Text>
-                                                        {swipeType === 'join' ? 'Join' : 'Leave'}
-                                                    </Text>
-                                                </Button>
-                                            </DefaultView>
-                                        }
-                                    </BottomModal>
-                            }
-                        </View>
+                        {
+                            <SwipeButton 
+                                type={swipeType!}
+                                onSwiped={handleSwiped}
+                            />
+                        }
+                        {
+                            showLoadingInfo && <ModalLoadingInfo status={statusLoading} />
+                        }
                         </>
                     }
             </View>
@@ -244,8 +214,8 @@ const styles = StyleSheet.create({
     },
     dataText: {
         fontSize:120,
-        width:'100%', 
-        height:'45%', 
+        width:'75%', 
+        height:'40%', 
         textAlign:'center'
     },
     dataTitle: {
