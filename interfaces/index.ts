@@ -78,7 +78,7 @@ export interface Player {
     position:            Position;
     photo?:               null | string;
     secondary_positions?: any[];
-    rating:              null;
+    rating:              null | number;
     email?:               string;
 }
 

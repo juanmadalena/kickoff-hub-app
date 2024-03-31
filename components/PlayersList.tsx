@@ -51,7 +51,7 @@ const PlayersList = ( {players, isOrganizer = false}: PlayersListProps ) => {
                                 <View style={[styles.playerData]}>
                                     <ProfilePicture uri={player.photo} player={player} />
                                     <View style={[styles.playerText]}>
-                                        <Text style={[styles.playerName]}>{player.first_name} {player.last_name}</Text>
+                                        <Text adjustsFontSizeToFit numberOfLines={2} style={[styles.playerName]}>{player.first_name} {player.last_name}</Text>
                                         <Text style={[styles.playerPosition]}>{player.position}</Text>
                                     </View>
                                 </View>
@@ -59,7 +59,7 @@ const PlayersList = ( {players, isOrganizer = false}: PlayersListProps ) => {
                                     <View style={[styles.ratingContainer, {backgroundColor}]}>
                                         <View style={[]}>
                                             <Text style={[styles.ratingText]}>
-                                                {player.rating || '0.0'}
+                                                {player.rating?.toFixed(1) || '0.0'}
                                             </Text>
                                         </View>
                                     </View>
@@ -91,9 +91,12 @@ const styles = StyleSheet.create({
     playerData: {
         flexDirection: 'row',
         alignItems: 'center',
+        paddingHorizontal: 0,
+        width: '82%'
     },
     playerText: {
-        marginLeft: 10
+        flex:1,
+        marginLeft: 10,
     },
     playerName: {
         fontSize: 16,
