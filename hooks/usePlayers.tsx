@@ -3,13 +3,23 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/config/api";
 import { PlayersResponse, Position } from "@/interfaces";
 
+type RatePlayerParams = {
+    idMatch: string;
+    idUserRated: string;
+    rate: number;
+}
+
 const getPlayersByMatchId = async (id: string): Promise<PlayersResponse> => {
     const { data } = await api.get(`/matches/${id}/players`);
     return data;
 }
 
+const getPlayersToRate = async (idMatch: string) => {
+    const { data } =  await api.get(`/matches/${idMatch}/playersToRate`);
+    return data;
+}
+
 const joinMatch = async (idMatch: string, idUser: string) => {
-    console.log('joinMatch')
     const { data } =  await api.post(`/matches/${idMatch}/join`, {idMatch, idUser, position:'GK'});
     return data;
 }
@@ -19,13 +29,17 @@ const leaveMatch = async (idMatch: string, idUser: string) => {
     return data;
 }
 
+const ratePlayer = async ( { idMatch, idUserRated, rate }: RatePlayerParams ) => {
+    const { data } =  await api.post(`/matches/${idMatch}/ratePlayer`, {idUserRated , rate});
+    return data;
+}
+
 const updateUserBasicInfo = async ( userInfo: {firstName:string, lastName:string, position: Position} ) => {
     const { data } =  await api.put(`/user/`, {...userInfo});
     return data;
 }
 
 const uploadProfilePhoto = async (formData: FormData) => {
-    console.log('uploadProfilePhoto');
     const { status } = await api.post('/user/uploadProfilePhoto', formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
@@ -42,6 +56,17 @@ export const usePlayers = (id: string) => {
 
     return {
         playersQuery
+    }
+}
+
+export const usePlayersToRate = (idMatch: string) => {
+    const playersToRateQuery = useQuery({
+        queryKey: ['matches/[idMatch]/playersToRate', idMatch],
+        queryFn: () => getPlayersToRate(idMatch),
+    });
+
+    return {
+        playersToRateQuery
     }
 }
 
@@ -89,17 +114,43 @@ export const useLeaveMatch = (idMatch: string, idUser: string) => {
     }
 }
 
+export const useRatePlayer = () => {
+
+    const queryClient = useQueryClient();
+    
+    const ratePlayerQuery = useMutation({
+        mutationKey: ['ratePlayer'],
+        mutationFn:ratePlayer,
+        onMutate: async ( { idMatch, idUserRated, rate }: RatePlayerParams ) => {
+            queryClient.setQueryData(
+                ['matches/[idMatch]/playersToRate', idMatch],
+                (oldData: PlayersResponse | undefined) => {
+                    if(oldData) {
+
+                        const playerIndex = oldData.players.findIndex(player => player.id === idUserRated);
+                        
+                        if(playerIndex === -1) return oldData;
+
+                        oldData.players[playerIndex].rating = rate;
+
+                        return oldData;
+                    }
+                    return oldData;
+                }
+            )
+        }
+    });
+
+    return{
+        ratePlayerQuery
+    }
+}
+
 export const useUploadProfilePhoto = () => {
 
     const uploadProfilePhotoQuery = useMutation({
         mutationKey: ['uploadProfilePhoto'],
         mutationFn: (formData: FormData) => uploadProfilePhoto(formData),
-        onSuccess: () => {
-            console.log('Photo uploaded');
-        },
-        onError: (error) => {
-            console.log(error);
-        },
     });
 
     return{
@@ -112,12 +163,6 @@ export const useUpdateUserBasicInfo = () => {
     const updateUserBasicInfoQuery = useMutation({
         mutationKey: ['updateUserBasicInfo'],
         mutationFn: ( userInfo: {firstName:string, lastName:string, position: Position} ) => updateUserBasicInfo(userInfo),
-        onSuccess: () => {
-            console.log('User basic info updated');
-        },
-        onError: (error) => {
-            console.log(error);
-        },
     });
 
     return{
