@@ -2,7 +2,8 @@ import { createMaterialTopTabNavigator, MaterialTopTabNavigationOptions, Materia
 import { withLayoutContext } from 'expo-router';
 import { ParamListBase, TabNavigationState } from '@react-navigation/native';
 import TopTab from '@/components/TopTabs';
-import useNotifications from '@/hooks/useNotifications';
+import { useNotifications } from '@/hooks/useNotifications';
+import useNotificationsObserver from '@/hooks/useNotificationsObserver';
 
 const { Navigator } = createMaterialTopTabNavigator();
 
@@ -16,6 +17,7 @@ export const MaterialTopTabNavigator = withLayoutContext<
 const TabsLayout = () => {
 
     useNotifications();
+    useNotificationsObserver();
 
     return (
         <MaterialTopTabNavigator
@@ -28,7 +30,7 @@ const TabsLayout = () => {
         >
             <MaterialTopTabNavigator.Screen name="index" options={{ title: 'Matches' }}/>
             <MaterialTopTabNavigator.Screen name="matchesOrganized" options={{ title: 'Organized' }} />
-            <MaterialTopTabNavigator.Screen name="matchesHistory" options={{ title: 'History' }} />
+            <MaterialTopTabNavigator.Screen name="matchesHistory" options={{ title: 'Played' }} />
         </MaterialTopTabNavigator>
     );
 };
