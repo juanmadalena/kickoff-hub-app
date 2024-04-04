@@ -128,6 +128,8 @@ const editBasicInfo = () => {
                             duration={300}
                             modalHeight={450}
                             transparent
+                            allowDragDownToClose
+                            setVisible={() => setShowPositionModal(false)}
                         >
                             <PositionPicker
                                 position={position}
