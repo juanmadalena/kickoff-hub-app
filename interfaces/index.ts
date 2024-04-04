@@ -46,6 +46,11 @@ export interface Match {
     players:     Player[];
 }
 
+export interface MatchFiltered {
+    title: string;
+    data:  Match[];
+}
+
 export interface Organizer {
     id:         string;
     first_name: string;
