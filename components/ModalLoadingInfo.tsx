@@ -1,8 +1,7 @@
 import { View, useThemeColor, Text } from '@/components/Themed';
 import LoadingComponent from '@/components/LoadingComponent';
-import { useFade } from '@/hooks/useFade';
-import { Animated, Modal } from 'react-native';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Animated, Modal, Easing } from 'react-native';
+import { useEffect, useRef } from 'react';
 import Icon from './Icon';
 
 interface Props {
@@ -10,8 +9,6 @@ interface Props {
 }
 
 const ModalLoadingInfo = ( {status}:Props ) => {
-
-    // const [status, setStatus] = useState<Props['status']>('loading');
 
     const backgroundColor = useThemeColor({}, 'itemBackground');
     const containerColor = useThemeColor({}, 'background');
