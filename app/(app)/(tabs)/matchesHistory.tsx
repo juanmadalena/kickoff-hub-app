@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { SectionList } from 'react-native';
+import { RefreshControl, SectionList } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 
 import MatchItem from '@/components/MatchItem';
-import { View, Text } from '@/components/Themed';
+import { View, Text, useThemeColor } from '@/components/Themed';
 import { useMatchesPlayed } from '@/hooks/useMatches';
 import LoadingComponent from '@/components/LoadingComponent';
 import TopBarNavigator from '@/components/TopBarNavigator';
@@ -18,11 +18,14 @@ const matchesHistory = () => {
 
     const [ filteredData, setFilteredData ] = useState<any[]>([])
 
+    const cardColor = useThemeColor({}, 'playedColor')
+
     useFocusEffect(() => {
         matchesPlayedQuery.refetch();
     });
 
     const changeFilter = (filter: keyof typeof showOptions, group: keyof Match , order: keyof typeof orderOptions ) => {
+        if(!matchesPlayedQuery.isSuccess) return;
         const filtered = filterMatches({matches: matchesPlayedQuery.data?.matches!, filter, group, order})
         setFilteredData(filtered)
     }
@@ -46,12 +49,13 @@ const matchesHistory = () => {
 
     return (
         <View style={{flex:1}}>
-            <FiltersComponent color='#172A3A' changeFilter={changeFilter} marginBottom={12} />
+            <FiltersComponent color={cardColor} changeFilter={changeFilter} marginBottom={12} />
             {
-                matchesPlayedQuery.isSuccess && 
+                matchesPlayedQuery.isSuccess && filteredData && filteredData?.length > 0 &&
                     <SectionList
                         sections={filteredData}
-                        renderItem={({item, index}) => <MatchItem match={item} index={index} checkMatches={false} cardColor='#172A3A' />}
+                        refreshControl={<RefreshControl refreshing={false} onRefresh={matchesPlayedQuery.refetch}/>}
+                        renderItem={({item}) => <MatchItem match={item} checkMatches={false} cardColor={cardColor} />}
                         keyExtractor={(_, index) => index.toString()}
                         showsVerticalScrollIndicator={false}
                         style={{paddingHorizontal: 10, flex:1}}
