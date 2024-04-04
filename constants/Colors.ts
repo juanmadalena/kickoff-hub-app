@@ -4,6 +4,9 @@ const primaryColor = '#004834';
 const secondaryColor = '#005B41';
 const errorColor = '#ff0000';
 
+const organizedColor = '#013A3D'
+const playedColor = '#172A3A'
+
 export default {
   light: {
     text: '#000',
@@ -18,6 +21,8 @@ export default {
     errorColor,
     starsColor: '#E4AE00',    
     yellowBackground: '#E4AE0022',
+    organizedColor,
+    playedColor,
   },
   dark: {
     text: '#fff',
@@ -32,6 +37,8 @@ export default {
     errorColor,
     starsColor: '#FFC300FF',
     yellowBackground:'#FFC30022',
+    organizedColor,
+    playedColor,
   },
 };
 

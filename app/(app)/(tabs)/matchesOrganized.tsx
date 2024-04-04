@@ -25,6 +25,7 @@ const matchesOrganized = () => {
     const router = useRouter();
 
     const buttonColor = useThemeColor({}, 'secondaryColor');
+    const cardColor = useThemeColor({}, 'organizedColor')
 
     if(matchesOrganizedQuery.isLoading) {
         return( 
@@ -64,13 +65,13 @@ const matchesOrganized = () => {
     return (
         <>
             <View style={{height:'100%'}}>
-                <FiltersComponent color='#004759' changeFilter={changeFilter} />
+                <FiltersComponent color={cardColor} changeFilter={changeFilter} />
                 {
                     matchesOrganizedQuery.isSuccess && filteredData && filteredData?.length > 0 &&
                     <SectionList
                         sections={filteredData}
                         refreshControl={<RefreshControl refreshing={false} onRefresh={matchesOrganizedQuery.refetch}/>}
-                        renderItem={({ item }) => <MatchItem match={item} checkMatches={false} cardColor='#004759' /> }
+                        renderItem={({ item }) => <MatchItem match={item} checkMatches={false} cardColor={cardColor} /> }
                         keyExtractor={item => item.id}
                         showsVerticalScrollIndicator={false}
                         style={{paddingHorizontal: 10, flex:1, height:'100%'}}
