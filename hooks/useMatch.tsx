@@ -10,14 +10,7 @@ const getMatchById = async (id: string): Promise<MatchResponse> => {
 }
 
 const createMatch = async (form: createMatchProps) => {
-    // const { data } = await api.post('/matches', form);
-    const { data } = await axios.post('http://192.168.0.248:8020/matches', form, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQzOTczNzBjLWQ2OWQtNDk5OS05OTMyLTVlY2Y5OGIyOThiNCIsImlhdCI6MTcxMTIzNDYyMCwiZXhwIjoxNzEyNDQ0MjIwfQ.zOhZ20LoA7FjOs8IvR0xpEklRde8UD0hJ6n0uzVHSGg'
-        }
-    
-    });
+    const { data } = await api.post('/matches', form);
     return data;
 }
 
