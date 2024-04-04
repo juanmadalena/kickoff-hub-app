@@ -48,7 +48,7 @@ const MatchItem = ({ match, index = 0, height = 135, checkMatches = true, ...pro
                         <Text style={{fontSize:120, width:'80%', fontWeight:'500', color:'white'}} numberOfLines={1} adjustsFontSizeToFit>{match.location}</Text>
                     </DefaultView>
                     <DefaultView style={{flexDirection:'row', width:'100%', alignItems: 'center'}}>
-                        <MatchDetailChip text={match.time.slice(0,-3)} style={{ opacity: isActive ? 1 : 0.3 }} />
+                        <MatchDetailChip text={match.time?.slice(0,-3)} style={{ opacity: isActive ? 1 : 0.3 }} />
                         <MatchDetailChip text={match.num_players +' / ' + match.max_players} style={{ opacity: isActive ? 1 : 0.3 }} />
                     </DefaultView>
                 </DefaultView>

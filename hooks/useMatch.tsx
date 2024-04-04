@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "@/config/api";
 import { MatchResponse } from "@/interfaces";
-import axios from "axios";
 
 const getMatchById = async (id: string): Promise<MatchResponse> => {
     const { data } = await api.get(`/matches/${id}`);
