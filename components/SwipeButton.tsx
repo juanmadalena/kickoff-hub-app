@@ -16,26 +16,30 @@ const SwipeButton = ( { onSwiped, type }: SwipeButtonProps ) => {
     let colors = ['#222222', '#196b54'];
     let disabled = false;
 
+    const primaryColor = useThemeColor({}, 'primaryColor');
+    const secondaryColor = useThemeColor({}, 'secondaryColor');
+    const backgroundColor = useThemeColor({}, 'selectionBackground');
+
     switch (type) {
       case 'join':
         disabled = false;
         text = 'Swipe to join the match';
-        colors = ['#222222', '#196b54'];
+        colors = [backgroundColor, secondaryColor];
         break;
       case 'leave':
         disabled = false;
         text = 'Swipe to leave the match';
-        colors = ['#222222', '#d32f2f'];
+        colors = [backgroundColor, '#d32f2f'];
         break;
       case 'full':
         disabled = false;
         text = 'Match is full';
-        colors = ['#222222', '#ff9800'];
+        colors = [backgroundColor, '#ff9800'];
         break;
       case 'disabled':
         disabled = true;
         text = 'Match already played';
-        colors = ['#222222', '#ff9800'];
+        colors = [backgroundColor, '#ff9800'];
         break;
       default:
         disabled = false;
@@ -114,12 +118,12 @@ const SwipeButton = ( { onSwiped, type }: SwipeButtonProps ) => {
     }
 
     return (
-        <Animated.View  style={[styles.container, !disabled ? {...backgroundStyles} : {opacity:0.8}]}>
+        <Animated.View  style={[styles.container, !disabled ? {...backgroundStyles} : {opacity:1, backgroundColor}]}>
           <DefaultView { ...!disabled ? {...panResponder.panHandlers} : ''} style={[styles.innerContainer]}>
           {
             disabled ? 
               <DefaultView style={[ styles.track, {width: '100%'}]}>
-                <Text style={{opacity:0.4}}>{ text }</Text>
+                <Text style={{opacity:0.4, fontWeight:'600'}}>{ text }</Text>
               </DefaultView>
             :
               <>
