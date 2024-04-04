@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { Modal, StyleSheet, Animated, Dimensions, PanResponder, View as DefaultView } from 'react-native';
 
 import { View, useThemeColor } from '@/components/Themed';
@@ -13,13 +13,16 @@ type BottomModalProps = Modal['props'] & {
     setVisible?: () => void;
 }
 
-const BottomModal = ( props : BottomModalProps ) => {
+const BottomModal = ( props : BottomModalProps ) =>{
     
-    const { visible = true, children, modalHeight = '35%', duration = 300, allowDragDownToClose = false, modalBackground, setVisible, ...otherProps } = props as BottomModalProps;
+    const background = useThemeColor({}, 'itemBackground');
+
+    const { visible = true, children, modalHeight = '35%', duration = 300, allowDragDownToClose = false, modalBackground = background, setVisible, ...otherProps } = props as BottomModalProps;
+
     const { height } = Dimensions.get('screen');
 
     //Animation for the modal
-    const translateY = new Animated.Value(height);
+    const translateY = useRef(new Animated.Value(height)).current;
 
     useEffect(() => {
         if(visible){
@@ -74,7 +77,7 @@ const BottomModal = ( props : BottomModalProps ) => {
         <Modal {...otherProps}>
             <View style={styles.container}>
                 <Animated.View { ...allowDragDownToClose && {...panResponder.panHandlers}} style={{...styles.bottomContainer, height: modalHeight , transform: [{translateY:translateY}], zIndex:999}}>
-                    <View style={[{ flex:1, borderRadius:25, paddingVertical:14 }, modalBackground ? { backgroundColor:modalBackground} : null ]}>
+                    <View style={[{ flex:1, borderRadius:25, paddingVertical:14 },{ backgroundColor:modalBackground} ]}>
                         {
                          allowDragDownToClose &&   
                             <DefaultView style={{width:'100%', alignItems:'center', justifyContent:'center'}}>
