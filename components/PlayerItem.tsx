@@ -12,9 +12,10 @@ import { Text } from '@/components/Themed';
 type PlayerItemProps = {
     player: Player;
     isOrganizer: boolean;
+    matchEnded?: boolean;
 }
 
-const PlayerItem = ( { player, isOrganizer }: PlayerItemProps ) => {
+const PlayerItem = ( { player, isOrganizer, matchEnded = false }: PlayerItemProps ) => {
 
     const backgroundColor =useThemeColor({}, 'selectionBackground');
     const modalBackground = useThemeColor({}, 'itemBackground');
@@ -28,6 +29,20 @@ const PlayerItem = ( { player, isOrganizer }: PlayerItemProps ) => {
         })
     }
 
+    const pressToRemovePlayer = () => {
+        if(!matchEnded && isOrganizer) {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+            setShowBottomModal(true)
+        }
+    }
+
+    const handleRemovePlayer = () => {
+        if(matchEnded) {
+            return;
+        }
+        setShowBottomModal(false)
+    }
+
     return (
         <>
             <TouchableOpacity 
@@ -35,12 +50,7 @@ const PlayerItem = ( { player, isOrganizer }: PlayerItemProps ) => {
                 key={player.id} 
                 style={[styles.playerContainer]}
                 onPress={() => navigateToPlayerDetails(player.id)}
-                onLongPress={() => {
-                    if(isOrganizer) {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-                        setShowBottomModal(true)
-                    }
-                }}
+                onLongPress={pressToRemovePlayer}
             >
                 <View style={[styles.playerData]}>
                     <ProfilePicture uri={player.photo} player={player} />
@@ -77,16 +87,13 @@ const PlayerItem = ( { player, isOrganizer }: PlayerItemProps ) => {
                         </View>
                         <View style={{flexDirection:'row', justifyContent:'space-between', width:'80%'}}>
                             <TouchableOpacity 
-                                style={{padding:8, borderRadius:8, backgroundColor:'#A30000', width:'48%', alignItems:'center'}}
-                                onPress={() => {
-                                    setShowBottomModal(false)
-                                    // Remove player
-                                }}
+                                style={{height:40, justifyContent:'center', padding:8, borderRadius:8, backgroundColor:'#A30000', width:'48%', alignItems:'center'}}
+                                onPress={handleRemovePlayer}
                             >
                                 <Text style={{color:'white', fontSize:16, fontWeight:'600'}}>Remove</Text>
                             </TouchableOpacity>
                             <TouchableOpacity 
-                                style={{padding:8, borderRadius:8, backgroundColor:backgroundColor, width:'48%', alignItems:'center'}}
+                                style={{height:40, justifyContent:'center', padding:8, borderRadius:8, backgroundColor:backgroundColor, width:'48%', alignItems:'center'}}
                                 onPress={() => setShowBottomModal(false)}
                             >
                                 <Text style={{color:'white', fontSize:16, fontWeight:'600'}}>Cancel</Text>
