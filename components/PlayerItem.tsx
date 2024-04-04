@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { Player } from '@/interfaces';
 import ProfilePicture from '@/components/ProfilePicture';
 import { useThemeColor } from '@/components/Themed';
 import BottomModal from '@/components/BottomModal';
 import { Text } from '@/components/Themed';
+import { useRemovePlayer } from '@/hooks/useMatch';
+import ModalLoadingInfo from './ModalLoadingInfo';
+import { sleep } from '@/utils/sleep';
 
 type PlayerItemProps = {
     player: Player;
@@ -20,7 +24,15 @@ const PlayerItem = ( { player, isOrganizer, matchEnded = false }: PlayerItemProp
     const backgroundColor =useThemeColor({}, 'selectionBackground');
     const modalBackground = useThemeColor({}, 'itemBackground');
 
-    const [ showBottomModal, setShowBottomModal ] = useState(false)
+    const [ showBottomModal, setShowBottomModal ] = useState<boolean>(false)
+
+    const [ showLoadingInfo, setShowLoadingInfo ] = useState<boolean>(false)
+    const [ statusLoading, setStatusLoading ] = useState<'loading' | 'success' | 'error' >('loading')
+
+    const { id: idMatch } = useLocalSearchParams()
+
+    const { removePlayerQuery } = useRemovePlayer(idMatch as string)
+    const queryClient = useQueryClient();
 
     const navigateToPlayerDetails = (id: string) => {
         router.push({
@@ -36,11 +48,33 @@ const PlayerItem = ( { player, isOrganizer, matchEnded = false }: PlayerItemProp
         }
     }
 
-    const handleRemovePlayer = () => {
+    const handleRemovePlayer = async () => {
         if(matchEnded) {
             return;
         }
-        setShowBottomModal(false)
+        try{
+            setStatusLoading('loading')
+            setShowLoadingInfo(true)
+
+            await removePlayerQuery.mutateAsync({ idMatch: idMatch as string, idUserToRemove: player.id})
+
+            setStatusLoading('success')
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
+        }
+        catch(err: any){
+            setStatusLoading('error')
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+        }
+        finally{
+            await sleep(2000)
+            setShowBottomModal(false)
+            setShowLoadingInfo(false)
+
+            //Refetch players
+            queryClient.refetchQueries({
+                queryKey:[`matches/[id]/players`, idMatch],
+            })
+        }
     }
 
     return (
@@ -87,7 +121,7 @@ const PlayerItem = ( { player, isOrganizer, matchEnded = false }: PlayerItemProp
                         </View>
                         <View style={{flexDirection:'row', justifyContent:'space-between', width:'80%'}}>
                             <TouchableOpacity 
-                                style={{height:40, justifyContent:'center', padding:8, borderRadius:8, backgroundColor:'#A30000', width:'48%', alignItems:'center'}}
+                                style={{height:40, justifyContent:'center', padding:8, borderRadius:8, backgroundColor:'#A3000077', width:'48%', alignItems:'center'}}
                                 onPress={handleRemovePlayer}
                             >
                                 <Text style={{color:'white', fontSize:16, fontWeight:'600'}}>Remove</Text>
@@ -100,6 +134,7 @@ const PlayerItem = ( { player, isOrganizer, matchEnded = false }: PlayerItemProp
                             </TouchableOpacity>
                         </View>
                     </View>
+                { showLoadingInfo && <ModalLoadingInfo status={statusLoading} /> }
                 </BottomModal>
             }
         </>

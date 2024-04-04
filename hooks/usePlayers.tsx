@@ -39,6 +39,16 @@ const updateUserBasicInfo = async ( userInfo: {firstName:string, lastName:string
     return data;
 }
 
+const updatePassword = async (oldPassword: string, newPassword: string) => {
+    const { data } =  await api.put(`/user/updatePassword`, {oldPassword, newPassword});
+    return data;
+}
+
+const updateEmail = async (email: string) => {
+    const { data } =  await api.put(`/user/updateEmail`, {email});
+    return data;
+}
+
 const uploadProfilePhoto = async (formData: FormData) => {
     const { status } = await api.post('/user/uploadProfilePhoto', formData, {
         headers: {
@@ -167,5 +177,29 @@ export const useUpdateUserBasicInfo = () => {
 
     return{
         updateUserBasicInfoQuery
+    }
+}
+
+export const useUpdatePassword = () => {
+    
+    const updatePasswordQuery = useMutation({
+        mutationKey: ['updatePassword'],
+        mutationFn: ( {oldPassword, newPassword}: {oldPassword: string, newPassword: string} ) => updatePassword(oldPassword, newPassword),
+    });
+
+    return{
+        updatePasswordQuery
+    }
+}
+
+export const useUpdateEmail = () => {
+    
+    const updateEmailQuery = useMutation({
+        mutationKey: ['updateEmail'],
+        mutationFn: ( email: string ) => updateEmail(email),
+    });
+
+    return{
+        updateEmailQuery
     }
 }

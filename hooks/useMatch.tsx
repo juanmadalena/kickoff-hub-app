@@ -13,6 +13,11 @@ const createMatch = async (form: createMatchProps) => {
     return data;
 }
 
+const removePlayer = async ({idMatch, idUserToRemove}: {[key:string]:string}) => {
+    const { data } = await api.post(`/matches/${idMatch}/remove`, { idUserToRemove });
+    return data;
+}
+
 export const useMatch = (id: string) => {
     const matchQuery = useQuery({
         queryKey: ['matches/[id]', id],
@@ -47,5 +52,17 @@ export const useCreateMatch = () => {
 
     return {
         createMatchQuery
+    }
+}
+
+export const useRemovePlayer = (idMatch: string) => {
+    
+    const removePlayerQuery = useMutation({
+        mutationKey:['removePlayer'],
+        mutationFn: removePlayer,
+    });
+
+    return {
+        removePlayerQuery
     }
 }
