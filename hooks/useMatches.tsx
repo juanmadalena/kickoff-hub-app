@@ -9,7 +9,7 @@ const getMatchesByDate = async (date: string): Promise<MatchesResponse> => {
     return data;
 }
 
-const getMatchesPlayed = async (): Promise<MatchesPlayedResponse> => {
+const getMatchesPlayed = async (): Promise<MatchesResponse> => {
 
     const { data } = await api.get(`/matches/played`);
     return data;
