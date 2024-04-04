@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import Icon from './Icon';
-import { Text, useThemeColor } from '@/components/Themed';
+import { Text } from '@/components/Themed';
 
 interface Props {
     text: string
@@ -11,10 +11,9 @@ interface Props {
 
 const MatchDetailChip = ({ text, IconName, style }: Props) => {
 
-    const backgroundColor = useThemeColor({}, 'secondaryColor');
 
     return (
-        <View style={[{...styles.container, backgroundColor:`${backgroundColor}`}, style]} >
+        <View style={[styles.container, style, { backgroundColor:'#FFFFFF22' }]} >
             {
                 IconName && <Icon name={IconName} size={14} style={{marginRight: 4, color:'white'}}/>
             }
@@ -29,7 +28,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         paddingVertical: 6,
         paddingHorizontal: 10,
-        // backgroundColor: '#2a2a2a',
         borderRadius: 8,
         marginRight: 10,
     },
