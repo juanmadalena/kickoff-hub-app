@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { View as DefaultView, ScrollView, StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import { View as DefaultView, ScrollView, StyleSheet, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 
@@ -8,19 +8,18 @@ import { useMatch } from '@/hooks/useMatch';
 import { formatDateToString } from '@/utils/formatDateToString';
 import ProfilePicture from '@/components/ProfilePicture';
 import SwipeButton from '@/components/SwipeButton';
-// import BottomModal from '@/components/BottomModal';
 import { AuthContext } from '@/context/authContext/AuthContext';
 import { useJoinMatch, useLeaveMatch, usePlayers } from '@/hooks/usePlayers';
-// import Icon from '@/components/Icon';
 import PlayersList from '@/components/PlayersList';
 import Map from '@/components/Map';
 import { formatTimeDuration } from '@/utils/formatTimeDuration';
 import { checkIfMatchIsAvailable } from '@/utils/checkIfMatchIsAvailable';
-// import MutationStatus from '@/components/MutationStatus';
 import { sleep } from '@/utils/sleep';
 import LoadingComponent from '@/components/LoadingComponent';
 import TopBarNavigator from '@/components/TopBarNavigator';
 import ModalLoadingInfo from '@/components/ModalLoadingInfo';
+import { localNotifications } from '@/hooks/useNotifications';
+import { calculateEndTime } from '@/utils/calculateEndTime';
 
 const Match = () => {
 
@@ -32,9 +31,12 @@ const Match = () => {
     
     //Get the match data from the id
     const { matchQuery } = useMatch(id as string)
+    
 
     //Get the background color from the theme
     const backgroungColor = useThemeColor({}, 'itemBackground')
+    const yellowColor = useThemeColor({}, 'starsColor')
+    const yellowBackground = useThemeColor({}, 'yellowBackground')
 
     //Get the players from the match
     const { playersQuery } = usePlayers(id as string)
@@ -42,6 +44,9 @@ const Match = () => {
     //Mutations for joining and leaving the match
     const { joinMatchQuery } = useJoinMatch(id as string, user?.id! )
     const { leaveMatchQuery } = useLeaveMatch(id as string, user?.id! )
+
+    //Notifications
+    const { scheduleNotification, cancelScheduledNotification } = localNotifications();
     
     //State for the loading modal
     const [ showLoadingInfo, setShowLoadingInfo ] = useState(false);
@@ -50,7 +55,12 @@ const Match = () => {
     //State for the swipe button
     const [ swipeType, setSwipeType ] = useState<'join' | 'leave' | 'full' | 'disabled' | undefined >(undefined);
 
+    const [ endDate, setEndDate ] = useState<Date | undefined>(undefined)
+
     useEffect(() => {
+        if(matchQuery.data?.match.date){
+            setEndDate(calculateEndTime(matchQuery.data?.match.date!, matchQuery.data?.match.time!, matchQuery.data?.match.duration!))
+        }
         setSwipeType( checkIfMatchIsAvailable( matchQuery.data?.match , playersQuery.data?.players, user?.id! ) );
     }, [playersQuery.data?.players, matchQuery.data?.match])
 
@@ -60,12 +70,48 @@ const Match = () => {
             setShowLoadingInfo(true)
             if(swipeType === 'join') {
                 await joinMatchQuery.mutateAsync();
+
+                let notificationDate = endDate!;
+                notificationDate.setHours(notificationDate.getHours() - 1)
+                // Reminder notification
+                scheduleNotification(
+                    {
+                        title:`${matchQuery.data?.match.location} Reminder! ⚽`, 
+                        body:'Match is starting in 1 hour!',
+                        data: { 
+                            url: '/(app)/match/[id]',
+                            params: { id: matchQuery.data?.match.id! }
+                        }
+                    }, 
+                    new Date(notificationDate),
+                    matchQuery.data?.match.id!
+                )
+
+                // Reminder to rate teammates
+                notificationDate.setHours(notificationDate.getHours() + 1)
+                notificationDate.setMinutes(notificationDate.getMinutes() + 10)
+                scheduleNotification(
+                    {
+                        title:`Good game?`, 
+                        body:'Rate your teammates! 🏅',
+                        data: { 
+                            url: '/(app)/(modals)/ratePlayersModal',
+                            params: { idMatch: matchQuery.data?.match.id! }
+                        }
+                    }, 
+                    new Date(notificationDate),
+                    matchQuery.data?.match.id! + 'rate'
+                )
+
             }
             if(swipeType === 'leave') {
                 await leaveMatchQuery.mutateAsync();
+                cancelScheduledNotification(matchQuery.data?.match.id!)
+                cancelScheduledNotification(matchQuery.data?.match.id!+'rate')
             }
             setStatusLoading('success')
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+            
         }
         catch(e){
             setStatusLoading('error')
@@ -78,22 +124,24 @@ const Match = () => {
         }
     }
 
+    if(matchQuery.isLoading || playersQuery.isLoading) return <LoadingComponent />
+
+    if(matchQuery.isError){
+        return(
+            <View style={{flex:1, alignItems:'center', justifyContent:'center'}}>
+                <Text>Error loading match</Text>
+            </View>
+        )
+    }
     return (
         <>
-            <TopBarNavigator />
-            {/* <Button onPress={() => router.navigate({pathname:'/(app)/(modals)/[matchModal]', params:{matchModal:id}})}>
-                <Text>Match</Text>
-            </Button> */}
+            <TopBarNavigator 
+                icon={ matchQuery.data?.match.organizer?.id === user?.id ? 'settings' : undefined}
+                iconSize={20}
+                action={() => router.navigate({pathname:'/(app)/(modals)/[matchModal]', params:{idMatch:id}})}
+            />
             <View style={{flex:1}}>
                     {
-                        matchQuery.isLoading ?
-                        <LoadingComponent />
-                        :
-                        matchQuery.isError ?
-                        <View style={{flex:1, alignItems:'center', justifyContent:'center'}}>
-                            <Text>Error loading match</Text>
-                        </View>
-                        :
                         matchQuery.data &&
                         <>
                         <ScrollView style={{height:'100%'}} bounces={false} showsVerticalScrollIndicator={false}>
@@ -105,7 +153,7 @@ const Match = () => {
                                             initialRegion={{latitude: matchQuery.data?.match.latitude!, longitude: matchQuery.data?.match.longitude!, latitudeDelta: 0.0922, longitudeDelta: 0.0421 }} 
                                             markers={[{latitude: matchQuery.data?.match.latitude!, longitude: matchQuery.data?.match.longitude!}]}
                                         />
-                                    </DefaultView>  
+                                    </DefaultView> 
                                     <DefaultView style={{marginVertical:10, backgroundColor:'transparent', borderWidth:0, borderColor:'red', width:'100%'}}>
                                         <Text style={[styles.locationTitle]}>
                                             {matchQuery.data?.match.location}
@@ -141,6 +189,24 @@ const Match = () => {
                                     <Text></Text>
                                 </View>
                             </View>
+                            {
+                                endDate && endDate < new Date() && 
+                                playersQuery.data && 
+                                playersQuery.data?.players?.filter((player) => player.id !== user?.id).length > 0 &&
+                                <View style={[styles.container]}>
+                                    <TouchableOpacity activeOpacity={0.6} onPress={() => router.navigate({pathname:'(app)/(modals)/ratePlayersModal', params:{idMatch: id}})}>
+                                        <View style={[styles.dataContainer, {height:55, width:'100%', paddingHorizontal:24, backgroundColor: yellowBackground, borderWidth:2, borderColor:yellowColor, justifyContent:'space-between', flexDirection:'row'}]}>
+                                            <Text style={{fontWeight:'600', fontSize:16}}>
+                                                Rate your teammates!
+                                            </Text>
+                                            <Text>
+                                                🏅
+                                            </Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+                            }
+
                             {/* Players */}
                             <View style={[styles.container, { flexDirection:'column' }]}>
                                 <View style={[styles.dataContainer, {width:'100%', backgroundColor: backgroungColor}]}>
@@ -159,7 +225,7 @@ const Match = () => {
                                                 playersQuery.isError ?
                                                 <Text>Error loading players</Text>
                                                 :
-                                                <PlayersList players={playersQuery.data?.players} />
+                                                <PlayersList players={playersQuery.data?.players} isOrganizer={user?.id === matchQuery.data.match.organizer?.id}  matchEnded={endDate! < new Date()} />
                                             }
                                         </DefaultView>
                                     </DefaultView>
@@ -167,18 +233,18 @@ const Match = () => {
                             </View>
 
                             {/* Organizer */}
-                            <TouchableWithoutFeedback onPress={() => router.push({pathname:'/(app)/profile/[id]', params: { id: matchQuery.data.match.organizer?.id! }})}>
-                                <View style={[styles.container]}>
+                            <View style={[styles.container]}>
+                                <TouchableWithoutFeedback onPress={() => router.push({pathname:'/(app)/profile/[id]', params: { id: matchQuery.data.match.organizer?.id! }})}>
                                     <View style={[styles.dataContainer ,{width:'49%', backgroundColor: backgroungColor }]}>
                                         <Text style={[styles.dataTitle, {marginBottom:10}]}>Organizer</Text>
                                         <DefaultView style={{backgroundColor:'transparent',width:'100%', alignItems:'center', marginBottom:10}}>
                                             <ProfilePicture player={matchQuery.data.match.organizer} uri={matchQuery.data.match.organizer?.photo!} />
-                                            <Text style={{fontSize:16, marginTop:8}}>{matchQuery.data.match.organizer?.first_name} {matchQuery.data.match.organizer?.last_name}</Text>
+                                            <Text style={{fontSize:16, marginTop:8, fontWeight:'500'}}>{matchQuery.data.match.organizer?.first_name} {matchQuery.data.match.organizer?.last_name}</Text>
                                         </DefaultView>
                                     </View>
-                                </View>
-                            </TouchableWithoutFeedback>
-                            <View style={{height:68}}></View>
+                                </TouchableWithoutFeedback>
+                            </View>
+                            <View style={{height:90}}></View>
                         </ScrollView>
                         {
                             <SwipeButton 

@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { StyleSheet, View, Text as DText } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -23,6 +23,7 @@ const profileDetail = () => {
     const isUser = user?.id === id
 
     const backgroundColor = useThemeColor({}, 'itemBackground')
+    const primaryColor = useThemeColor({}, 'primaryColor')
 
     const navigateToSettings = () => {
         router.navigate({
@@ -34,6 +35,17 @@ const profileDetail = () => {
         return(
             <View style={[styles.container, {flex:1, justifyContent:'center', alignItems:'center'}]}>
                 <LoadingComponent />
+            </View>
+        )
+    }
+
+    if(isError){
+        return(
+            <View style={{flex:1}}>
+                <TopBarNavigator />
+                <View style={[styles.container, {flex:1, justifyContent:'center', alignItems:'center', marginBottom:12}]}>
+                    <Text>There was an error 😞 </Text>
+                </View>
             </View>
         )
     }
@@ -71,7 +83,7 @@ const profileDetail = () => {
                     <View style={[styles.dataBox, {backgroundColor}]}>
                         <Text style={[styles.dataTitle]}>Rating</Text>
                         <View style={[styles.dataTextContainer]}>
-                            <Text adjustsFontSizeToFit style={[styles.dataText]}>{data?.user.rating ?? '0.0'}</Text>
+                            <Text adjustsFontSizeToFit style={[styles.dataText]}>{data?.user.rating?.toFixed(1) ?? '0.0'}</Text>
                         </View>
                         <Text></Text>
                     </View>
@@ -80,7 +92,7 @@ const profileDetail = () => {
                     data?.lastMatchPlayed &&
                     <View style={[styles.dataContainer, {flexDirection:'column', alignItems:'flex-start'}]}>
                             <Text style={[styles.dataTitle, {marginBottom:6, marginLeft:8, textAlign:'left'}]}>Last match played</Text>
-                            <MatchItem match={data?.lastMatchPlayed!} />
+                            <MatchItem match={data?.lastMatchPlayed!} checkMatches={false} />
                     </View>
                 }
             </View>
