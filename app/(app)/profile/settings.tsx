@@ -61,7 +61,8 @@ const settings = () => {
             }
 
         }).catch( (error) => {
-            console.log(error)
+            setStatusModal("error")
+            handleModalLoadingClose()
         })
     }
     

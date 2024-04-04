@@ -18,7 +18,6 @@ const createMatch = async (form: createMatchProps) => {
         }
     
     });
-    console.log(data);
     return data;
 }
 
@@ -52,12 +51,6 @@ export const useCreateMatch = () => {
     const createMatchQuery = useMutation({
         mutationKey:['createMatch'],
         mutationFn: createMatch,
-        onSuccess: ()=>{
-            console.log("Vamooo")
-        },
-        onError: (error) => {
-            console.log(error);
-        }
     });
 
     return {

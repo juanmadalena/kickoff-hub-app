@@ -27,7 +27,7 @@ const editPassword = () => {
     }, [oldPassword, newPassword])
 
     const handleUpdateEmail = () => {
-        console.log('update email');
+        throw new Error('Function not implemented.');
     }
 
     return (

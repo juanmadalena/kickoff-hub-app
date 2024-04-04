@@ -167,11 +167,6 @@ const register = () => {
                                 autoCapitalize="none"
                                 value={position}
                                 editable={false}
-                                onSelectionChange={ () => console.log('selection change')}
-                                onChangeText={ () => console.log('changeText')}
-                                onChange={ () => console.log('changeSolo')}
-                                onEndEditing={ () => console.log('end editing')}
-                                onSubmitEditing={ () => console.log('submit editing')}
                                 autoCorrect={ false }
                                 onTouchStart={() => Keyboard.dismiss()}
                                 onTouchEnd={() => setShowModal(true)}

@@ -27,7 +27,7 @@ const editEmail = () => {
     }, [email])
 
     const handleUpdateEmail = () => {
-        console.log('update email');
+        throw new Error('Function not implemented.');
     }
 
     return (
