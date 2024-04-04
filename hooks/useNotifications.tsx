@@ -11,16 +11,7 @@ Notifications.setNotificationHandler({
     }),
 });
 
-// Notifications.scheduleNotificationAsync({
-//     content: {
-//       categoryIdentifier: 'match',
-//       title: 'Notification Test😎',
-//       body: 'Hello there!'
-//     },
-//     trigger: { seconds: 10 },
-// });
-
-const useNotifications = () => {
+export const useNotifications = () => {
 
     const [expoPushToken, setExpoPushToken] = useState<string>();
     const [notification, setNotification] = useState<Notifications.Notification>();
@@ -41,8 +32,8 @@ const useNotifications = () => {
         });
     
         return () => {
-          Notifications.removeNotificationSubscription(notificationListener.current!);
-          Notifications.removeNotificationSubscription(responseListener.current!);
+            Notifications.removeNotificationSubscription(notificationListener.current!);
+            Notifications.removeNotificationSubscription(responseListener.current!);
         };
     }, []);
 
@@ -63,13 +54,13 @@ const useNotifications = () => {
         if (status !== 'granted') {
             const { status } = await Notifications.requestPermissionsAsync();
             if (status !== 'granted') {
-                alert('Failed to get push token for push notification!');
+                // alert('Failed to get push token for push notification!');
                 return;
             }
         }
 
         token = (await Notifications.getExpoPushTokenAsync({projectId:'b7617f76-809d-4d12-a8f4-d9ed98b40fa2'})).data;
-        console.log(token);
+
         return token;
     }
 
@@ -79,4 +70,38 @@ const useNotifications = () => {
 
 };
 
-export default useNotifications;
+type NotificationContent = {
+    title: string,
+    body: string,
+    data?: any,
+
+}
+
+// Local Notifications
+export const localNotifications = () => {
+
+    const scheduleNotification = async ( content: NotificationContent , date: Date, notificationIdentifier: string ) => {
+
+        // check if the notifications are granted
+        const { status } = await Notifications.getPermissionsAsync();
+        if (status !== 'granted') {
+            // ask for permissions
+            await Notifications.requestPermissionsAsync();
+        }
+
+        await Notifications.scheduleNotificationAsync({
+            content,
+            trigger: { date },
+            identifier: notificationIdentifier
+        });
+    }
+
+    const cancelScheduledNotification = async ( notificationIdentifier: string ) => {
+        await Notifications.cancelScheduledNotificationAsync(notificationIdentifier);
+    }
+
+    return {
+        scheduleNotification,
+        cancelScheduledNotification
+    }
+}
