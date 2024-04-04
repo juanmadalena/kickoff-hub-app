@@ -1,7 +1,7 @@
 import { TouchableOpacity, TextInput as DefaultTextInput, View as DefaultView } from 'react-native';
 import RNDateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { View, TextInput, useThemeColor, Text } from '@/components/Themed';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import BottomModal from './BottomModal';
 import Icon from './Icon';
 import { formatDateToString } from '@/utils/formatDateToString';
@@ -20,14 +20,14 @@ interface DateTimePickerProps {
 const DateTimePicker = ( { type = 'date', placeholder, minimumDate, interval = 0, value, DatePickerProps, onChangeValue }: DateTimePickerProps) => {
     
     const inputRef = useRef<DefaultTextInput>(null);
-    const date = useRef(value);
+    const [ date, setDate ] = useState<Date>(value);
     const [ showDatePicker, setShowDatePicker ] = useState(false);
     const primaryColor = useThemeColor({}, 'primaryColor');
     const containerBackground = useThemeColor({}, 'itemBackground');
 
-    const setDate = (selectedDate: Date) => {
-        date.current = selectedDate;
-    }
+    useEffect(() => {
+        setDate(value);
+    }, [value])
 
     const formatValue = (value: Date) => {
         if(type === 'date'){
@@ -48,7 +48,7 @@ const DateTimePicker = ( { type = 'date', placeholder, minimumDate, interval = 0
     const handleClose = () => {
         setShowDatePicker(false);
         inputRef.current?.blur();
-        onChangeValue && onChangeValue(date.current);
+        onChangeValue && onChangeValue(date);
     }
 
     return (
@@ -56,7 +56,7 @@ const DateTimePicker = ( { type = 'date', placeholder, minimumDate, interval = 0
             <TextInput 
                 innerRef={inputRef}
                 containerStyle={{width:'100%'}}
-                value={formatValue(date.current)} 
+                value={formatValue(date)} 
                 placeholder={placeholder}
                 inputMode='none'
                 selectTextOnFocus={false}
@@ -81,7 +81,7 @@ const DateTimePicker = ( { type = 'date', placeholder, minimumDate, interval = 0
                                 </TouchableOpacity>
                             </DefaultView>
                             <RNDateTimePicker
-                                value={date.current} 
+                                value={date} 
                                 mode={type}
                                 minimumDate={minimumDate}
                                 display={ type === 'date' ? 'inline' : 'spinner'}

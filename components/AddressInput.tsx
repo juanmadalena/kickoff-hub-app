@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FlatList, View, TouchableOpacity, TextInput as DefaultTextInput, StyleSheet } from 'react-native';
 
 import { Text, useThemeColor } from '@/components/Themed';
@@ -14,11 +14,16 @@ interface AddressInputProps {
 const AddressInput = ( { value, onChangeAddress }: AddressInputProps ) => {
 
     const [ location, setLocation ] = useState<string>(value);
+    
     const [ showSuggestions, setShowSuggestions ] = useState(false)
 
     const inputRef = useRef<DefaultTextInput | null>(null);
 
     const backgroundColor = useThemeColor({}, 'itemBackground');
+
+    useEffect(() => {
+        setLocation(value);
+    }, [value])
 
     const { debouncedValue } = useDebouncer( location, 600 )
 
