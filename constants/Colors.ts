@@ -1,7 +1,8 @@
 const tintColorLight = '#2f95dc';
 const tintColorDark = '#fff';
-const primaryColor = '#005B41';
-const secondaryColor = '#004834';
+const primaryColor = '#004834';
+const secondaryColor = '#005B41';
+const errorColor = '#ff0000';
 
 export default {
   light: {
@@ -14,7 +15,9 @@ export default {
     tabIconSelected: tintColorLight,
     primaryColor,
     secondaryColor,
-    errorColor: '#ff0000',
+    errorColor,
+    starsColor: '#E4AE00',    
+    yellowBackground: '#E4AE0022',
   },
   dark: {
     text: '#fff',
@@ -26,7 +29,9 @@ export default {
     tabIconSelected: tintColorDark,
     primaryColor,
     secondaryColor,
-    errorColor: '#ff0000',
+    errorColor,
+    starsColor: '#FFC300FF',
+    yellowBackground:'#FFC30022',
   },
 };
 
