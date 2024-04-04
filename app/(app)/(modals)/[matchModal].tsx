@@ -16,7 +16,7 @@ const matchModal = () => {
 
     const [disabled, setDisabled] = useState(false);
 
-    const { matchModal : idMatch} = useLocalSearchParams<{ matchModal: string }>();
+    const { idMatch } = useLocalSearchParams<{ idMatch: string }>();
     const { user } = useContext(AuthContext);
 
     // Input refs
@@ -29,10 +29,6 @@ const matchModal = () => {
     const date = useRef<Date>(new Date());
     const time = useRef<string>('00:00');
     const duration = useRef<string>('01:00');
-
-    // const description = useRef<string>('');
-    // const maxPlayers = useRef<number | null>(null);
-    // const minPlayers = useRef<number | null>(null);
 
     const { matchQuery } = useMatch(idMatch ?? undefined);
 
@@ -61,10 +57,8 @@ const matchModal = () => {
     })
 
     useEffect(() => {
-
         if(matchQuery.data?.match.id){
             id.current = matchQuery.data?.match.id;
-
             location.current = matchQuery.data?.match.location;
             address.current = matchQuery.data?.match.address;
 
@@ -90,7 +84,7 @@ const matchModal = () => {
     }
 
     const handleSubmit = () => {
-        createMatchQuery.mutate({
+        createMatchQuery.mutateAsync({
             idAddress: idAddress.current, 
             idOrganizer: user?.id!, 
             location: location.current, 
@@ -102,7 +96,7 @@ const matchModal = () => {
             minPlayers,
             maxPlayers
         });
-        // goBack();
+        goBack();
     }
 
     return (
