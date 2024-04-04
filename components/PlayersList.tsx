@@ -8,10 +8,11 @@ import PlayerItem from './PlayerItem';
 
 interface PlayersListProps {
     players: Player[] | undefined; 
-    isOrganizer?: boolean;      
+    isOrganizer?: boolean;   
+    matchEnded?: boolean;   
 }
 
-const PlayersList = ( {players, isOrganizer = false}: PlayersListProps ) => {
+const PlayersList = ( {players, isOrganizer = false, matchEnded = false,}: PlayersListProps ) => {
 
     const { opacity, fadeIn } = useFade();
 
@@ -30,7 +31,7 @@ const PlayersList = ( {players, isOrganizer = false}: PlayersListProps ) => {
                 <Animated.View style={{opacity}}>
                     {
                         players?.map( player => (
-                           <PlayerItem key={player.id} player={player} isOrganizer={isOrganizer} />
+                           <PlayerItem key={player.id} player={player} isOrganizer={isOrganizer} matchEnded={matchEnded} />
                         ))
                     }
                 </Animated.View>
