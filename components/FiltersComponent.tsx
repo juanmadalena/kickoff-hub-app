@@ -7,32 +7,35 @@ import BottomModal from './BottomModal';
 import { Match, showOptions, orderOptions } from '@/interfaces';
 
 type FiltersComponentProps = {
+    order: keyof typeof orderOptions;
+    groupBy: keyof Match;
+    filter: keyof typeof showOptions;
     color: string;
-    marginBottom?: number;
-    changeFilter?: (filter: keyof typeof showOptions, group: keyof Match , order: keyof typeof orderOptions) => void;
+    changeFilter: (filter: keyof typeof showOptions, group: keyof Match , order: keyof typeof orderOptions) => void;
 }
 
-const FiltersComponent = ( { color, changeFilter }: FiltersComponentProps ) => {
+const FiltersComponent = ( { order, groupBy, filter, color, changeFilter }: FiltersComponentProps ) => {
 
     const backgroundColor = useThemeColor({}, 'selectionBackground');
     const modalBackground = useThemeColor({}, 'itemBackground');
 
-    const [ order, setOrder ] = useState<keyof typeof orderOptions>('DESCENDING');
-    const [ groupBy, setGroupBy ] = useState<keyof Match>('date');
-    const [ filter, setFilter ] = useState<keyof typeof showOptions>('ALL');
+    const [ orderSelected, setOrderSelected ] = useState<keyof typeof orderOptions>(order);
+    const [ groupBySelected, setGroupBySelected ] = useState<keyof Match>(groupBy);
+    const [ filterSelected, setFilterSelected ] = useState<keyof typeof showOptions>(filter);
 
     const [ showFilters, setShowFilters ] = useState(false);
 
     const groupByAllowed = ['date', 'location'] as (keyof Match)[];
     
-    useEffect(() => {
-        changeFilter && changeFilter( filter, groupBy, order);
-    }, [filter, groupBy, order])
+    const handleChangeFilter = () => {
+        changeFilter( filterSelected, groupBySelected, orderSelected);
+        setShowFilters(false);
+    }
 
     return (
     <>
         <TouchableOpacity 
-            onPress={() => setShowFilters(!showFilters)}
+            onPress={() => setShowFilters(true)}
             activeOpacity={0.7}
             style={{ marginBottom: 12, marginHorizontal:14, height:50, borderRadius:14, backgroundColor: modalBackground, paddingHorizontal:8, alignItems:'center', justifyContent:'space-between', flexDirection:'row'}}>
             <View style={{backgroundColor:'transparent', alignItems:'center', flexDirection:'row'}}>
@@ -64,15 +67,12 @@ const FiltersComponent = ( { color, changeFilter }: FiltersComponentProps ) => {
                 modalBackground={modalBackground}
                 modalHeight={340}
                 visible={showFilters}
-                setVisible={() => setShowFilters(false)}
+                setVisible={handleChangeFilter}
             >
-                <View style={{paddingHorizontal:18, height:'100%', justifyContent:'space-between'}}>
-                    <View style={{justifyContent:'space-between', alignItems:'center', flexDirection:'row', marginBottom:8}}>
-                        <Text style={{fontSize:20, fontWeight:'500'}}>
-                        {/* Filters */}
-                        </Text>
-                        <TouchableOpacity onPress={() => setShowFilters(false)} style={{ padding:10, borderRadius:100, backgroundColor:`${backgroundColor}AA`}}>
-                            <Icon name='close' size={20} />
+                <View style={{paddingHorizontal:18, height:'100%'}}>
+                    <View style={{justifyContent:'flex-end', alignItems:'center', flexDirection:'row', marginBottom:0}}>
+                        <TouchableOpacity onPress={handleChangeFilter} style={{ padding:10, borderRadius:100, backgroundColor:`${color}AA`}}>
+                            <Icon name='check' size={20} />
                         </TouchableOpacity>
                     </View>
                     <View style={{justifyContent:'space-around', flex:1, paddingBottom:16}}>
@@ -85,12 +85,12 @@ const FiltersComponent = ( { color, changeFilter }: FiltersComponentProps ) => {
                                         return (
                                             <TouchableOpacity 
                                                 activeOpacity={0.7}
-                                                onPress={() => setFilter(key as keyof typeof showOptions)}
+                                                onPress={() => setFilterSelected(key as keyof typeof showOptions)}
                                                 key={index} 
                                                 style={[ styles.filterButton, 
-                                                    {backgroundColor: key as keyof typeof showOptions== filter ? `${color}66` : `${backgroundColor}44`}                                                
+                                                    {backgroundColor: key as keyof typeof showOptions== filterSelected ? `${color}66` : `${backgroundColor}44`}                                                
                                                 ]}>
-                                                <Text style={[styles.filterButtonText, {opacity: key as keyof typeof showOptions == filter ? 1 : 0.5}]}>
+                                                <Text style={[styles.filterButtonText, {opacity: key as keyof typeof showOptions == filterSelected ? 1 : 0.5}]}>
                                                     {showOptions[key as keyof typeof showOptions]}
                                                 </Text>
                                             </TouchableOpacity>
@@ -107,12 +107,12 @@ const FiltersComponent = ( { color, changeFilter }: FiltersComponentProps ) => {
                                         return (
                                             <TouchableOpacity 
                                                 activeOpacity={0.7}
-                                                onPress={() => setGroupBy(key)}
+                                                onPress={() => setGroupBySelected(key)}
                                                 key={index} 
                                                 style={[ styles.filterButton, 
-                                                    {backgroundColor: key == groupBy ? `${color}66` : `${backgroundColor}44`}                                                
+                                                    {backgroundColor: key == groupBySelected ? `${color}66` : `${backgroundColor}44`}                                                
                                                 ]}>
-                                                <Text style={[styles.filterButtonText, {opacity: key == groupBy ? 1 : 0.5}]}>
+                                                <Text style={[styles.filterButtonText, {opacity: key == groupBySelected ? 1 : 0.5}]}>
                                                     {key.charAt(0).toUpperCase() + key.slice(1)}
                                                 </Text>
                                             </TouchableOpacity>
@@ -129,12 +129,12 @@ const FiltersComponent = ( { color, changeFilter }: FiltersComponentProps ) => {
                                         return (
                                             <TouchableOpacity 
                                                 activeOpacity={0.7}
-                                                onPress={() => setOrder(key as keyof typeof orderOptions)}
+                                                onPress={() => setOrderSelected(key as keyof typeof orderOptions)}
                                                 key={index} 
                                                 style={[ styles.filterButton, 
-                                                    {backgroundColor: key as keyof typeof orderOptions == order ? `${color}66` : `${backgroundColor}44`}                                                
+                                                    {backgroundColor: key as keyof typeof orderOptions == orderSelected ? `${color}66` : `${backgroundColor}44`}                                                
                                                 ]}>
-                                                <Text style={[styles.filterButtonText, {opacity: key as keyof typeof orderOptions == order ? 1 : 0.5}]}>
+                                                <Text style={[styles.filterButtonText, {opacity: key as keyof typeof orderOptions == orderSelected ? 1 : 0.5}]}>
                                                     {orderOptions[key as keyof typeof orderOptions]}
                                                 </Text>
                                             </TouchableOpacity>

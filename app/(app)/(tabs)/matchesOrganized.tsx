@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { FlatList, RefreshControl, View as DefaultView, StyleSheet, Animated, Easing, SectionList } from 'react-native';
+import { RefreshControl, View as DefaultView, StyleSheet, Animated, Easing, SectionList, Touchable, TouchableOpacity } from 'react-native';
+import { router } from 'expo-router';
 
 import { View, Text, Button, useThemeColor } from '@/components/Themed';
 import { useMatchesOrganized } from '@/hooks/useMatches';
@@ -8,7 +9,6 @@ import LoadingComponent from '@/components/LoadingComponent';
 import MatchItem from '@/components/MatchItem';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TopBarNavigator from '@/components/TopBarNavigator';
-import { useRouter } from 'expo-router';
 import FiltersComponent from '@/components/FiltersComponent';
 import { showOptions, orderOptions, Match } from '@/interfaces';
 import { filterMatches } from '@/utils/filterMatches';
@@ -20,24 +20,32 @@ const matchesOrganized = () => {
 
     const { matchesOrganizedQuery } = useMatchesOrganized();
     const { bottom } = useSafeAreaInsets();
-    const [ filteredData, setFilteredData ] = useState<any[]>([])
 
-    const router = useRouter();
+    const [ order, setOrder ] = useState<keyof typeof orderOptions>('ASCENDING');
+    const [ groupBy, setGroupBy ] = useState<keyof Match>('date');
+    const [ filter, setFilter ] = useState<keyof typeof showOptions>('ALL');
 
     const buttonColor = useThemeColor({}, 'secondaryColor');
     const cardColor = useThemeColor({}, 'organizedColor')
 
-    if(matchesOrganizedQuery.isLoading) {
-        return( 
-        <View style={{flex:1, alignItems:'center', justifyContent:'center'}}>
-            <LoadingComponent />
-        </View>)
-    };
+    const resetFilters = () => {
+        setOrder('ASCENDING');
+        setGroupBy('date');
+        setFilter('ALL');
+    }
 
     const changeFilter = (filter: keyof typeof showOptions, group: keyof Match , order: keyof typeof orderOptions ) => {
-        const filtered = filterMatches({matches: matchesOrganizedQuery.data?.matches!, filter, group, order})        
-        setFilteredData(filtered)
+        setOrder(order);
+        setGroupBy(group);
+        setFilter(filter);
     }
+
+    const filteredData: any[] = useMemo(() => {
+        if(matchesOrganizedQuery.isSuccess) {
+            return filterMatches({matches: matchesOrganizedQuery.data?.matches!, filter, group: groupBy, order})
+        }
+        return []
+    }, [matchesOrganizedQuery.data, filter, groupBy, order])
 
 
     // Animation rotate loop
@@ -62,29 +70,79 @@ const matchesOrganized = () => {
         outputRange: ['0deg', '360deg']
     });
 
+    if(matchesOrganizedQuery.isLoading) {
+        return( 
+        <View style={{flex:1, alignItems:'center', justifyContent:'center'}}>
+            <LoadingComponent />
+        </View>)
+    };
+
+    if(matchesOrganizedQuery.isError) {
+        return (
+            <View>
+                <View style={{flex:1, width:'100%', justifyContent:'center', alignItems:'center'}}>
+                    <Text>
+                        There was an error! 😞, try again later.
+                    </Text>
+                </View>
+            </View>
+        )
+    }
+
     return (
         <>
             <View style={{height:'100%'}}>
-                <FiltersComponent color={cardColor} changeFilter={changeFilter} />
                 {
-                    matchesOrganizedQuery.isSuccess && filteredData && filteredData?.length > 0 &&
-                    <SectionList
-                        sections={filteredData}
-                        refreshControl={<RefreshControl refreshing={false} onRefresh={matchesOrganizedQuery.refetch}/>}
-                        renderItem={({ item }) => <MatchItem match={item} checkMatches={false} cardColor={cardColor} /> }
-                        keyExtractor={item => item.id}
-                        showsVerticalScrollIndicator={false}
-                        style={{paddingHorizontal: 10, flex:1, height:'100%'}}
-                        contentContainerStyle={{paddingBottom: 130}}
-                        ListEmptyComponent={
-                            <Text style={{textAlign:'center', fontSize: 16, fontWeight: '600', marginTop:'40%'}}> 
-                                No matches found 😞
+                    matchesOrganizedQuery.isSuccess && filteredData && matchesOrganizedQuery.data.matches.length > 0 &&
+                    <>                    
+                        <FiltersComponent 
+                            order={order}
+                            groupBy={groupBy}
+                            filter={filter}
+                            color={cardColor} 
+                            changeFilter={changeFilter} 
+                        />
+                        <SectionList
+                            sections={filteredData}
+                            refreshControl={<RefreshControl refreshing={false} onRefresh={matchesOrganizedQuery.refetch}/>}
+                            renderItem={({ item }) => <MatchItem match={item} checkMatches={false} cardColor={cardColor} /> }
+                            keyExtractor={item => item.id}
+                            showsVerticalScrollIndicator={false}
+                            style={{paddingHorizontal: 10, flex:1, height:'100%'}}
+                            contentContainerStyle={{paddingBottom: 130}}
+                            ListEmptyComponent={
+                                <>
+                                    <Text style={{textAlign:'center', fontSize: 16, fontWeight: '600', marginTop:'40%'}}> 
+                                        No matches found 😞
+                                    </Text>
+                                    <TouchableOpacity onPress={resetFilters}>
+                                        <Text style={{textAlign:'center', fontSize: 14, fontWeight: '600', marginTop:12}}>
+                                            Reset your filters!
+                                        </Text>
+                                    </TouchableOpacity>
+                                </>
+                            }
+                            renderSectionHeader={ ( {section} ) => (
+                                <TitleSectionList title={section.title} />
+                            )}
+                        />
+                    </>
+                }
+                {
+                    matchesOrganizedQuery.isSuccess && matchesOrganizedQuery.data.matches.length == 0 &&
+                    filteredData && filteredData?.length === 0 &&
+                    <View style={{height:'80%', justifyContent:'center', alignItems:'center'}}>
+                        <TouchableOpacity
+                            activeOpacity={0.8} 
+                            onPress={() => router.navigate({
+                            pathname:'/(app)/(modals)/[matchModal]',
+                            params: { matchModal: false }
+                        })}>
+                            <Text style={{textAlign:'center', fontSize: 16, fontWeight: '600'}}> 
+                                Organize your first match! 🎉
                             </Text>
-                        }
-                        renderSectionHeader={ ( {section} ) => (
-                            <TitleSectionList title={section.title} />
-                        )}
-                    />
+                        </TouchableOpacity>
+                    </View>
                 }
                 <DefaultView style={{position:'absolute', bottom: bottom, left:'30%', right:'30%'}} >
                     <Button 

@@ -94,6 +94,9 @@ export const useJoinMatch = (idMatch: string, idUser: string) => {
             queryClient.refetchQueries({
                 queryKey:[`matches/[id]`, idMatch],
             });
+            queryClient.refetchQueries({
+                queryKey: ['matches/played'],
+            });
         }         
     });
 
@@ -115,6 +118,9 @@ export const useLeaveMatch = (idMatch: string, idUser: string) => {
             });
             queryClient.refetchQueries({
                 queryKey:[`matches/[id]`, idMatch],
+            });
+            queryClient.refetchQueries({
+                queryKey: ['matches/played'],
             });
         }  
     });

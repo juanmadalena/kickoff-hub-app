@@ -42,7 +42,7 @@ const PositionPicker = ({ onSelectPosition, position } : Props) => {
         { name: 'Goalkeeper', value: "GK", image: require(`../assets/images/positions/goalkeeper.png`)},
         { name: 'Defense', value: "DF", image: require(`../assets/images/positions/defense.png`)},
         { name: 'Midfielder', value: "MF", image: require(`../assets/images/positions/midfielder.png`)},
-        { name: 'Forward', value: "ST", image: require(`../assets/images/positions/striker.png`)},
+        { name: 'Forward', value: "FW", image: require(`../assets/images/positions/striker.png`)},
     ]
 
     const selectedStyles = {
