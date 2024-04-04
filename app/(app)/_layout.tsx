@@ -7,6 +7,7 @@ import { AuthContext } from '@/context/authContext/AuthContext';
 import { useFonts } from 'expo-font';
 // import TopBarNavigator from '@/components/TopBarNavigator';
 import TopBarProfile from '@/components/TopBarProfile';
+import { useThemeColor } from '@/components/Themed';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -22,7 +23,6 @@ export default function App(){
 
     //hide splash screen
     useEffect(() => {
-        console.log('status', status);
         if(status !== 'checking' && loaded){
             SplashScreen.hideAsync()
         }
@@ -52,6 +52,7 @@ function AppNav(){
                 <Stack.Screen name="profile" options={{ headerShown: false }} />
                 <Stack.Screen name="match/[id]" options={{ headerShown: false }} />
                 <Stack.Screen name="(modals)/[matchModal]" options={{ headerShown: false, animation:'fade_from_bottom', presentation:'modal' }} />
+                <Stack.Screen name="(modals)/ratePlayersModal" options={{ headerShown: false, animation:'fade_from_bottom', presentation:'modal' }} />
             </Stack>
         </>
     )
