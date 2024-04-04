@@ -88,20 +88,7 @@ export interface MatchesPlayedResponse {
 
 export interface MatchPlayed {
     title: string;
-    data:  MatchesPlayedData[];
-}
-
-export interface MatchesPlayedData {
-    id:          string;
-    date:        string;
-    time:        string;
-    duration:    string;
-    location:    string;
-    address:     string;
-    price:       number;
-    num_players: number;
-    min_players: number;
-    max_players: number;
+    data:  Match[];
 }
 
 export interface UserDataResponse {
@@ -113,4 +100,15 @@ export interface UserDataResponse {
 
 export interface MatchesCount {
     count: string;
+}
+
+export enum showOptions {
+    ALL = 'All',
+    UPCOMING = 'Upcoming',
+    PAST = 'Past'
+}
+
+export enum orderOptions {
+    ASCENDING = 'Ascending',
+    DESCENDING = 'Descending'
 }
