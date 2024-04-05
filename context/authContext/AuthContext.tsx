@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }:any) => {
     const login = async ({ email, password }: LoginData) => {
         try{
 
-            const { data } = await api.post<LoginResponse>('/auth/login', { email, password });
+            const { data } = await api.post<LoginResponse>('/auth/login', { email, password }, { timeout: 2000 });
 
             SecureStore.setItemAsync('token', data.token);
             
@@ -103,6 +103,13 @@ export const AuthProvider = ({ children }:any) => {
         }
         catch(err: any){
             if(err.isAxiosError){
+                if(err.code === 'ECONNABORTED'){
+                    return dispatch({
+                        type: 'addError',
+                        payload: {message: 'Cannot connect to the server. Please try again later.'}
+                    })
+                }
+                console.log(err.response.data);
                 return dispatch({
                     type: 'addError',
                     payload: err.response.data
