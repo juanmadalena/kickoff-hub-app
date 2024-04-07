@@ -1,4 +1,4 @@
-export const calculateEndTime = (startDate: string, startTime: string, duration: string, sumInMinutes?: number): Date => {
+export const calculateMatchStartAndEndTime = (startDate: string, startTime: string, duration: string, sumInMinutes?: number): { startDate: Date, endDate: Date} => {
     try{
         const [startHour, startMinute] = startTime.split(':').map(Number);
         
@@ -17,11 +17,20 @@ export const calculateEndTime = (startDate: string, startTime: string, duration:
 
         if(sumInMinutes) {
             const sumDate = new Date(endDate.getTime() + sumInMinutes * 60 * 1000);
-            return sumDate;
+            return {
+                startDate: startDateFormatted,
+                endDate: sumDate
+            }
         }
-        return endDate;
+        return {
+            startDate: startDateFormatted,
+            endDate
+        }
     }
     catch(e){
-        return new Date();
+        return {
+            startDate: new Date(),
+            endDate: new Date()
+        }
     }
 }

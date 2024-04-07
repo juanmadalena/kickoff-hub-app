@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { View as DefaultView, ScrollView, StyleSheet, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
@@ -19,7 +19,7 @@ import LoadingComponent from '@/components/LoadingComponent';
 import TopBarNavigator from '@/components/TopBarNavigator';
 import ModalLoadingInfo from '@/components/ModalLoadingInfo';
 import { localNotifications } from '@/hooks/useNotifications';
-import { calculateEndTime } from '@/utils/calculateEndTime';
+import { calculateMatchStartAndEndTime } from '@/utils/calculateMatchStartAndEndTime';
 import { verifyDate } from '@/utils/verifyDate';
 
 const Match = () => {
@@ -55,12 +55,15 @@ const Match = () => {
 
     //State for the swipe button
     const [ swipeType, setSwipeType ] = useState<'join' | 'leave' | 'full' | 'disabled' | undefined >(undefined);
-
+    
+    const startDateRef = useRef<Date>(new Date())
     const [ endDate, setEndDate ] = useState<Date | undefined>(undefined)
 
     useEffect(() => {
         if(matchQuery.data?.match.date){
-            setEndDate(calculateEndTime(matchQuery.data?.match.date!, matchQuery.data?.match.time!, matchQuery.data?.match.duration!))
+            const { startDate, endDate } = calculateMatchStartAndEndTime(matchQuery.data?.match.date!, matchQuery.data?.match.time!, matchQuery.data?.match.duration!)
+            startDateRef.current = startDate
+            setEndDate(endDate)
         }
         setSwipeType( checkIfMatchIsAvailable( matchQuery.data?.match , playersQuery.data?.players, user?.id! ) );
     }, [playersQuery.data?.players, matchQuery.data?.match])
@@ -72,8 +75,9 @@ const Match = () => {
             if(swipeType === 'join') {
                 await joinMatchQuery.mutateAsync();
 
-                let notificationDate = endDate!;
-                notificationDate.setHours(notificationDate.getHours() - 1)
+                // Start match time - 1 hour
+                const startDateNotification = new Date(startDateRef.current)
+                startDateNotification.setHours(startDateNotification.getHours() - 1)
                 // Reminder notification
                 scheduleNotification(
                     {
@@ -84,12 +88,13 @@ const Match = () => {
                             params: { id: matchQuery.data?.match.id! }
                         }
                     }, 
-                    new Date(notificationDate),
+                    startDateNotification,
                     matchQuery.data?.match.id!
                 )
 
                 // Reminder to rate teammates
-                notificationDate.setHours(notificationDate.getHours() + 1)
+                // 10 minutes after the match ends
+                let notificationDate = new Date(endDate!)
                 notificationDate.setMinutes(notificationDate.getMinutes() + 10)
                 scheduleNotification(
                     {
@@ -105,6 +110,8 @@ const Match = () => {
                 )
 
             }
+
+            // If the user leaves the match, cancel the notifications
             if(swipeType === 'leave') {
                 await leaveMatchQuery.mutateAsync();
                 cancelScheduledNotification(matchQuery.data?.match.id!)
