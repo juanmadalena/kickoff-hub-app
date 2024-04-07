@@ -41,11 +41,11 @@ const MatchItem = ({ match, index = 0, height = 135, checkMatches = true, ...pro
         >
             <Animated.View style={{...styles.container, backgroundColor: isActive ? cardColor : `${cardColor}AC`, height, opacity}}>
                 <DefaultView style={{height: '100%', width:'80%', justifyContent:'space-between', opacity: isActive ? 1 : 0.8}}>
-                    <DefaultView style={{justifyContent: 'center'}}>
-                        <Text style={{fontSize:14, fontWeight:'400', opacity:0.8, color:'white'}}>{match.address}</Text>
+                    <DefaultView style={{justifyContent: 'center', width:'100%'}}>
+                        <Text numberOfLines={1} adjustsFontSizeToFit style={{fontSize:14, fontWeight:'400', opacity:0.8, color:'white', width:'100%'}}>{match.address}</Text>
                     </DefaultView>
                     <DefaultView style={{justifyContent: 'center', width:'100%', height:'45%', paddingBottom:4}}>
-                        <Text style={{fontSize:120, width:'80%', fontWeight:'500', color:'white'}} numberOfLines={1} adjustsFontSizeToFit>{match.location}</Text>
+                        <Text style={{fontSize:120, width:'95%', fontWeight:'500', color:'white'}} numberOfLines={1} adjustsFontSizeToFit>{match.location}</Text>
                     </DefaultView>
                     <DefaultView style={{flexDirection:'row', width:'100%', alignItems: 'center'}}>
                         <MatchDetailChip text={match.time?.slice(0,-3)} style={{ opacity: isActive ? 1 : 0.3 }} />

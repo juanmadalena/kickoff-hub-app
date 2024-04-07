@@ -6,9 +6,12 @@ export const checkIfMatchIsAvailable = (match: Match | undefined, playersList?: 
     
     //Check if the match is in the past
     const formatDate = match?.date.split('T')[0]
-    const matchDate = new Date(formatDate+'T'+match?.time+'.000Z');
+    const matchDate = new Date(formatDate+'T'+match?.time+'.000Z').getTime();
     
-    if( matchDate < new Date() ){
+    const timeOffset = new Date().getTimezoneOffset() * 60000 * -1;
+    const currentDate = new Date().getTime() + timeOffset;
+
+    if( matchDate < currentDate ){
         return 'disabled';
     }
 

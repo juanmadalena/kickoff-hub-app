@@ -8,8 +8,7 @@ export function formatDateToString(date: Date | string | number, format?: format
     if(!date) return '';
 
     if(typeof date === 'string' || typeof date === 'number') date = new Date(date);
-    
-
+    console.log(date);
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
@@ -19,14 +18,14 @@ export function formatDateToString(date: Date | string | number, format?: format
 
     switch(format){
         case 'yyyy-mm-dd':
-            return `${year}-${month > 10 ? month : 0 +''+ month}-${day > 10 ? day : 0 +''+ day}`;
+            return `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
         case 'dd/mm':
-            return `${day > 10 ? day : 0 +''+ day}/${month > 10 ? month : 0 +''+ month}`;
+            return `${day.toString().padStart(2,'0')}/${month.toString().padStart(2,'0')}`;
         case 'dd/mm/yyyy':
-            return `${day > 10 ? day : 0 +''+ day}/${month > 10 ? month : 0 +''+ month}/${year}`;
+            return `${day.toString().padStart(2,'0')}/${month.toString().padStart(2,'0')}/${year}`;
         case 'hh:mm':
-            return `${hours > 10 ? hours : 0 +''+hours }:${minutes > 10 ? minutes : 0 +''+ minutes}`;
+            return `${hours.toString().padStart(2,'0') }:${minutes.toString().padStart(2,'0')}`;
         default:
-            return `${year}-${month > 10 ? month : 0 +''+ month}-${day > 10 ? day : 0 +''+ day}`;
+            return `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
     }
 }
