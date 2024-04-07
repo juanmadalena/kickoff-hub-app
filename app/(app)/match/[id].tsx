@@ -38,6 +38,7 @@ const Match = () => {
     const backgroungColor = useThemeColor({}, 'itemBackground')
     const yellowColor = useThemeColor({}, 'starsColor')
     const yellowBackground = useThemeColor({}, 'yellowBackground')
+    const errorColor = useThemeColor({}, 'errorColor')
 
     //Get the players from the match
     const { playersQuery } = usePlayers(id as string)
@@ -54,7 +55,7 @@ const Match = () => {
     const [ statusLoading, setStatusLoading ] = useState<'success' | 'error' | 'loading'>('loading');
 
     //State for the swipe button
-    const [ swipeType, setSwipeType ] = useState<'join' | 'leave' | 'full' | 'disabled' | undefined >(undefined);
+    const [ swipeType, setSwipeType ] = useState<'join' | 'leave' | 'full' | 'disabled' | 'canceled' | undefined >(undefined);
     
     const startDateRef = useRef<Date>(new Date())
     const [ endDate, setEndDate ] = useState<Date | undefined>(undefined)
@@ -144,15 +145,31 @@ const Match = () => {
     return (
         <>
             <TopBarNavigator 
-                icon={ matchQuery.data?.match.organizer?.id === user?.id && new Date() < startDateRef.current ? 'settings' : undefined}
+                icon={ 
+                    matchQuery.data?.match.organizer?.id === user?.id && 
+                    new Date() < startDateRef.current &&
+                    !matchQuery.data?.match.is_canceled 
+                    ? 'settings' : undefined}
                 iconSize={20}
                 action={() => router.navigate({pathname:'/(app)/(modals)/[matchModal]', params:{idMatch:id}})}
             />
+
             <View style={{flex:1}}>
                     {
                         matchQuery.data &&
                         <>
                         <ScrollView style={{height:'100%'}} bounces={false} showsVerticalScrollIndicator={false}>
+                            {
+                                matchQuery.data.match.is_canceled &&
+                                <View style={[styles.container]}>
+                                    <View style={[styles.dataContainer, {width:'100%', height:60, backgroundColor: `${errorColor}33`, justifyContent:'center'}]}>
+                                        <Text style={{fontSize:16, fontWeight:'600', textAlign:'center'}}>
+                                            This match has been canceled
+                                        </Text>
+                                    </View>
+                                </View>
+                            }
+                            
                             {/* Location */}
                             <View style={[styles.container, { flexDirection:'column' }]}>
                                 <View style={[styles.dataContainer, {width:'100%', backgroundColor: backgroungColor}]}>

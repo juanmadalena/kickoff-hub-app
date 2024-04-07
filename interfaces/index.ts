@@ -44,6 +44,7 @@ export interface Match {
     min_players: number;
     max_players: number;
     players:     Player[];
+    is_canceled?:  boolean;
 }
 
 export interface MatchFiltered {
@@ -116,4 +117,29 @@ export enum showOptions {
 export enum orderOptions {
     ASCENDING = 'Ascending',
     DESCENDING = 'Descending'
+}
+
+export type createMatchProps = {
+    date: string | Date;
+    time: string;
+    location: string;
+    address: string;
+    idAddress: string | undefined;
+    description: string;
+    maxPlayers: number;
+    minPlayers: number;
+    duration: string;
+    idOrganizer: string;
+}
+
+export type updateMatchProps = {
+    id: string;
+    description: string;
+    maxPlayers: number;
+    minPlayers: number;
+    duration: string;
+}
+
+export type cancelMatchProps = {
+    idMatch: string;
 }

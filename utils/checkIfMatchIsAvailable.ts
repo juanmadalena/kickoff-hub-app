@@ -1,7 +1,7 @@
 import { Match, Player } from "@/interfaces";
 
     //check if the match is available
-export const checkIfMatchIsAvailable = (match: Match | undefined, playersList?: Player[] | undefined, userId?: string): 'join' | 'leave' | 'full' | 'disabled' => {
+export const checkIfMatchIsAvailable = (match: Match | undefined, playersList?: Player[] | undefined, userId?: string): 'join' | 'leave' | 'full' | 'disabled' | 'canceled' => {
     if(!match) return 'disabled';
     
     //Check if the match is in the past
@@ -10,6 +10,10 @@ export const checkIfMatchIsAvailable = (match: Match | undefined, playersList?: 
     
     const timeOffset = new Date().getTimezoneOffset() * 60000 * -1;
     const currentDate = new Date().getTime() + timeOffset;
+
+    if( match?.is_canceled){
+        return 'canceled';
+    }
 
     if( matchDate < currentDate ){
         return 'disabled';

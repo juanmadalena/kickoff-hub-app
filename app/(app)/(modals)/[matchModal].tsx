@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { Keyboard, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, TouchableOpacity, View as DefaultView } from 'react-native';
 import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 
 import AddressInput from '@/components/AddressInput';
@@ -7,17 +7,21 @@ import DateTimePicker from '@/components/DateTimePicker';
 import { View, TextInput, Text } from '@/components/Themed';
 import { AuthContext } from '@/context/authContext/AuthContext';
 import { useForm } from '@/hooks/useForm';
-import { useCreateMatch, useMatch } from '@/hooks/useMatch';
+import { useCancelMatch, useCreateMatch, useMatch, useUpdateMatch } from '@/hooks/useMatch';
 import { formatTimeToDate } from '@/utils/formatTimeToDate';
 import TopBarNavigator from '@/components/TopBarNavigator';
 import { formatDateToString } from '@/utils/formatDateToString';
 import { isAxiosError } from 'axios';
+import { useQueryClient } from '@tanstack/react-query';
+import BottomModal from '@/components/BottomModal';
 
 const matchModal = () => {
     const router = useRouter();
 
     const [disabled, setDisabled] = useState(false);
     const [ error, setError ] = useState<string | undefined>(undefined);
+
+    const [ showCancelModal, setShowCancelModal ] = useState(false);
 
     const { idMatch } = useLocalSearchParams<{ idMatch: string }>();
     const { user } = useContext(AuthContext);
@@ -42,6 +46,9 @@ const matchModal = () => {
     });
 
     const { createMatchQuery } = useCreateMatch();
+    const { updateMatchQuery } = useUpdateMatch();
+    const { cancelMatchQuery } = useCancelMatch();
+    const queryClient = useQueryClient();
 
     const goBack = () => {
         if(router.canGoBack()){
@@ -113,99 +120,169 @@ const matchModal = () => {
                 return;
             }
 
-            await createMatchQuery.mutateAsync({
-                idAddress: idAddress.current, 
-                idOrganizer: user?.id!, 
-                location: location.current, 
-                address: address.current,
-                time: time.current,
-                date: date.current,
-                duration: duration.current,
-                description,
-                minPlayers,
-                maxPlayers
-            });
+            if( !id.current ){
+                await createMatchQuery.mutateAsync({
+                    idAddress: idAddress.current, 
+                    idOrganizer: user?.id!, 
+                    location: location.current, 
+                    address: address.current,
+                    time: time.current,
+                    date: date.current,
+                    duration: duration.current,
+                    description,
+                    minPlayers,
+                    maxPlayers
+                });
+            }else{
+                await updateMatchQuery.mutateAsync({
+                    id: id.current,
+                    description,
+                    minPlayers,
+                    maxPlayers,
+                    duration: duration.current
+                });
+                queryClient.refetchQueries({
+                    queryKey:[`matches/[id]`, id.current],
+                });
+            }
+            goBack();
         }
         catch(e){
             if(isAxiosError(e)){
                 setError(e.response?.data.message.message);
             }
         }
-        goBack();
+    }
+
+    const handleCancelMatch = async () => {
+        try{
+            await cancelMatchQuery.mutateAsync({ idMatch: idMatch! });
+            queryClient.refetchQueries({
+                queryKey:[`matches/[id]`, id.current],
+            });
+            router.back();
+        }
+        catch(e){
+            if(isAxiosError(e)){
+                setError(e.response?.data.message.message);
+            }
+            setShowCancelModal(false);
+        }
     }
 
     return (
-        <KeyboardAvoidingView style={{flex: 1, paddingHorizontal:12}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={180}>
-            <View style={{paddingTop:4, flex:1}}>
-                <TouchableOpacity activeOpacity={1} style={{flex:1}} onPress={Keyboard.dismiss}> 
-                <View style={{width:'100%', alignItems: 'center', justifyContent: 'center', marginTop:10, marginBottom:8}}>
-                    <View style={{backgroundColor:'grey', opacity:0.4, borderRadius:18, width:100, height:5, marginBottom:8}}>
+        <>
+            <KeyboardAvoidingView style={{flex: 1, paddingHorizontal:12}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={180}>
+                <View style={{paddingTop:4, flex:1}}>
+                    <TouchableOpacity activeOpacity={1} style={{flex:1}} onPress={Keyboard.dismiss}> 
+                    <View style={{width:'100%', alignItems: 'center', justifyContent: 'center', marginTop:10, marginBottom:8}}>
+                        <View style={{backgroundColor:'grey', opacity:0.4, borderRadius:18, width:100, height:5, marginBottom:8}}>
+                        </View>
+                        <TopBarNavigator title={id.current == undefined ? 'Create match' : 'Update match'} icon='check' activeColor disabled={disabled} action={handleSubmit}/>
                     </View>
-                    <TopBarNavigator title={id.current == undefined ? 'Create match' : 'Update match'} icon='check' activeColor disabled={disabled} action={handleSubmit}/>
-                </View>
-                <AddressInput 
-                    value={ location.current != '' ? `${location.current}, ${address.current}`: ''} 
-                    onChangeAddress={(location, address, idAddress) => handleAddressSelection(location, address, idAddress)} 
-                />
-                <TextInput
-                    value={description}
-                    onChangeText={(value) => onChange(value, 'description')}
-                    placeholder="Description"
-                />
-                <View style={{width:'100%', flexWrap:'wrap', flexDirection:'row', justifyContent:'space-between'}}>
-                    <TextInput
-                        value={minPlayers == 0 ? undefined : minPlayers.toString()}
-                        onChangeText={(value) => onChange(value, 'minPlayers')}
-                        placeholder="Min players*"
-                        selectTextOnFocus={true}
-                        focusable={true}
-                        containerStyle={{width:'48%'}}
-                        inputMode="numeric"
-                        keyboardType="numeric"
+                    <AddressInput 
+                        editable={id.current == undefined}
+                        value={ location.current != '' ? `${location.current}, ${address.current}`: ''} 
+                        onChangeAddress={(location, address, idAddress) => handleAddressSelection(location, address, idAddress)} 
                     />
                     <TextInput
-                        value={ maxPlayers == 0 ? undefined : maxPlayers.toString()}
-                        onChangeText={(value) => onChange(value, 'maxPlayers')}
-                        placeholder="Max players*"
-                        selectTextOnFocus={true}
-                        containerStyle={{width:'48%'}}
-                        inputMode="decimal"
+                        value={description}
+                        onChangeText={(value) => onChange(value, 'description')}
+                        placeholder="Description"
                     />
+                    <View style={{width:'100%', flexWrap:'wrap', flexDirection:'row', justifyContent:'space-between'}}>
+                        <TextInput
+                            value={minPlayers == 0 ? undefined : minPlayers.toString()}
+                            onChangeText={(value) => onChange(value, 'minPlayers')}
+                            placeholder="Min players*"
+                            selectTextOnFocus={true}
+                            focusable={true}
+                            containerStyle={{width:'48%'}}
+                            inputMode="numeric"
+                            keyboardType="numeric"
+                        />
+                        <TextInput
+                            value={ maxPlayers == 0 ? undefined : maxPlayers.toString()}
+                            onChangeText={(value) => onChange(value, 'maxPlayers')}
+                            placeholder="Max players*"
+                            selectTextOnFocus={true}
+                            containerStyle={{width:'48%'}}
+                            inputMode="decimal"
+                        />
+                    </View>
+                    <View style={{flexDirection:'row', flexWrap:'wrap', justifyContent:'space-between', marginVertical:8}}>
+                        <View style={{ width:'47%' }}>
+                            <DateTimePicker 
+                                value={new Date(date.current)} 
+                                type='date' 
+                                minimumDate={new Date(date.current)} 
+                                placeholder='Date*'
+                                onChangeValue={(value) => ( date.current = value )}
+                                editable={id.current == undefined}
+                            />
+                        </View>
+                        <View style={{ width:'23%' }}>
+                            <DateTimePicker 
+                                value={formatTimeToDate(time.current)} 
+                                type='time' 
+                                placeholder='Time*' 
+                                onChangeValue={(value) => ( time.current = formatDateToString(value, 'hh:mm'))}
+                                editable={id.current == undefined}
+                            />
+                        </View>
+                        <View style={{ width:'23%' }}>
+                            <DateTimePicker 
+                                DatePickerProps={{minuteInterval:15}} 
+                                minimumDate={undefined} 
+                                value={formatTimeToDate(duration.current)} 
+                                type='time' 
+                                placeholder='Duration*'
+                                onChangeValue={(value) => (duration.current = formatDateToString(value, 'hh:mm'))}
+                            />
+                        </View>
+                    </View>
+                    {
+                        id.current && 
+                        <Text style={{opacity:0.7, fontSize:13}}>
+                            Cannot update the location, time, or date of the game!
+                        </Text>
+                    }
+                    {error && <Text style={{fontSize:15, color:'red', textAlign:'center', marginTop:8}}>{error}</Text>}
+
+                    {
+                        idMatch &&
+                        <View style={{ position:'absolute', bottom:60, alignItems:'center', justifyContent:'center', width:'100%'}}>
+                            <TouchableOpacity style={{ width:'80%', paddingVertical:12, backgroundColor:'rgba(255,0,0,0.6)', borderRadius:12 }} onPress={() => setShowCancelModal(true)}>
+                                <Text style={{fontSize:16, textAlign:'center', fontWeight:'500', color:'white'}}>Cancel Match</Text>
+                            </TouchableOpacity>
+                        </View>
+                    }
+                    </TouchableOpacity>
                 </View>
-                <View style={{flexDirection:'row', flexWrap:'wrap', justifyContent:'space-between', marginVertical:8}}>
-                    <View style={{ width:'47%' }}>
-                        <DateTimePicker 
-                            value={new Date(date.current)} 
-                            type='date' 
-                            minimumDate={new Date(date.current)} 
-                            placeholder='Date*'
-                            onChangeValue={(value) => ( date.current = value )}    
-                        />
-                    </View>
-                    <View style={{ width:'23%' }}>
-                        <DateTimePicker 
-                            // minimumDate={ matchQuery.data?.match.date ? new Date(matchQuery.data?.match.date) : new Date()} 
-                            value={formatTimeToDate(time.current)} 
-                            type='time' 
-                            placeholder='Time*' 
-                            onChangeValue={(value) => ( time.current = formatDateToString(value, 'hh:mm'))}
-                        />
-                    </View>
-                    <View style={{ width:'23%' }}>
-                        <DateTimePicker 
-                            DatePickerProps={{minuteInterval:15}} 
-                            minimumDate={undefined} 
-                            value={formatTimeToDate(duration.current)} 
-                            type='time' 
-                            placeholder='Duration*'
-                            onChangeValue={(value) => (duration.current = formatDateToString(value, 'hh:mm'))}
-                        />
-                    </View>
-                </View>
-                {error && <Text style={{fontSize:15, color:'red', textAlign:'center', marginTop:8}}>{error}</Text>}
-                </TouchableOpacity>
-            </View>
-        </KeyboardAvoidingView>
+            </KeyboardAvoidingView>
+            {
+                showCancelModal &&
+                <BottomModal
+                    transparent
+                    allowDragDownToClose
+                >
+                    <DefaultView style={{flex:1, paddingVertical:8, paddingHorizontal:18, flexDirection:'column', justifyContent:'space-between', }}>
+                        <Text></Text>
+                        <Text style={{fontSize:16, paddingHorizontal:4, fontWeight:'600', textAlign:'center', marginBottom:8}}>
+                            Are you sure you want to cancel the match?
+                        </Text>
+                        <DefaultView style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
+                            <TouchableOpacity style={{padding:8, backgroundColor:'rgba(0,0,0,0.5)', borderRadius:8, width:'48%', alignItems:'center'}} onPress={() => setShowCancelModal(false)}>
+                                <Text style={{color:'white', fontSize:16}}>Back</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={{padding:8, backgroundColor:'rgba(255,0,0,0.5)', borderRadius:8, width:'48%', alignItems:'center'}} onPress={handleCancelMatch}>
+                                <Text style={{color:'white', fontSize:16}}>Cancel</Text>
+                            </TouchableOpacity>
+                        </DefaultView>
+                    </DefaultView>
+                </BottomModal>
+            }
+        </>
     );
 };
 

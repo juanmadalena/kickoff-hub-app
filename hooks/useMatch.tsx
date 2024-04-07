@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "@/config/api";
-import { MatchResponse } from "@/interfaces";
+import { MatchResponse, createMatchProps, updateMatchProps, cancelMatchProps } from "@/interfaces";
 
 const getMatchById = async (id: string): Promise<MatchResponse> => {
     const { data } = await api.get(`/matches/${id}`);
@@ -10,6 +10,16 @@ const getMatchById = async (id: string): Promise<MatchResponse> => {
 
 const createMatch = async (form: createMatchProps) => {
     const { data } = await api.post('/matches', form);
+    return data;
+}
+
+const updateMatch = async (form: updateMatchProps) => {
+    const { data } = await api.put(`/matches`, form);
+    return data;
+}
+
+const cancelMatch = async (form: cancelMatchProps) => {
+    const { data } = await api.delete(`/matches/${form.idMatch}`);
     return data;
 }
 
@@ -30,19 +40,6 @@ export const useMatch = (id: string) => {
     }
 }
 
-export type createMatchProps = {
-    date: string | Date;
-    time: string;
-    location: string;
-    address: string;
-    idAddress: string | undefined;
-    description: string;
-    maxPlayers: number;
-    minPlayers: number;
-    duration: string;
-    idOrganizer: string;
-}
-
 export const useCreateMatch = () => {
 
     const createMatchQuery = useMutation({
@@ -52,6 +49,28 @@ export const useCreateMatch = () => {
 
     return {
         createMatchQuery
+    }
+}
+
+export const useUpdateMatch = () => {  
+    const updateMatchQuery = useMutation({
+        mutationKey:['updateMatch'],
+        mutationFn: updateMatch,
+    });
+
+    return {
+        updateMatchQuery
+    }
+}
+
+export const useCancelMatch = () => {
+    const cancelMatchQuery = useMutation({
+        mutationKey:['cancelMatch'],
+        mutationFn: cancelMatch,
+    });
+
+    return {
+        cancelMatchQuery
     }
 }
 

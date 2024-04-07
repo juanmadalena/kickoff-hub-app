@@ -6,7 +6,7 @@ import { useBounce } from '@/hooks/useBounce';
 import Icon from './Icon';
 
 interface SwipeButtonProps {
-  type: 'join' | 'leave' | 'full' | 'disabled',
+  type: 'join' | 'leave' | 'full' | 'disabled' | 'canceled',
   onSwiped: () => void,
 }
 
@@ -39,6 +39,11 @@ const SwipeButton = ( { onSwiped, type }: SwipeButtonProps ) => {
       case 'disabled':
         disabled = true;
         text = 'Match already played';
+        colors = [backgroundColor, '#ff9800'];
+        break;
+      case 'canceled':
+        disabled = true;
+        text = 'Match canceled';
         colors = [backgroundColor, '#ff9800'];
         break;
       default:

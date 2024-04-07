@@ -89,11 +89,16 @@ export const localNotifications = () => {
             await Notifications.requestPermissionsAsync();
         }
 
+
+        const offset = new Date().getTimezoneOffset();
+        let startDateFormatted = new Date(date);
+        startDateFormatted.setMinutes(startDateFormatted.getMinutes() + offset);
+
         await Notifications.scheduleNotificationAsync({
             content,
-            trigger: { date },
+            trigger: { date: startDateFormatted },
             identifier: notificationIdentifier
-        });
+        });        
     }
 
     const cancelScheduledNotification = async ( notificationIdentifier: string ) => {
