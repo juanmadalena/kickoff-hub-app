@@ -60,6 +60,7 @@ const Match = () => {
     useEffect(() => {
         if(matchQuery.data?.match.date){
             setEndDate(calculateEndTime(matchQuery.data?.match.date!, matchQuery.data?.match.time!, matchQuery.data?.match.duration!))
+            console.log("end date", endDate, matchQuery.data?.match.date, matchQuery.data?.match.time, matchQuery.data?.match.duration)
         }
         setSwipeType( checkIfMatchIsAvailable( matchQuery.data?.match , playersQuery.data?.players, user?.id! ) );
     }, [playersQuery.data?.players, matchQuery.data?.match])
@@ -154,16 +155,29 @@ const Match = () => {
                                             markers={[{latitude: matchQuery.data?.match.latitude!, longitude: matchQuery.data?.match.longitude!}]}
                                         />
                                     </DefaultView> 
-                                    <DefaultView style={{marginVertical:10, backgroundColor:'transparent', borderWidth:0, borderColor:'red', width:'100%'}}>
+                                    <DefaultView style={{marginVertical:10, backgroundColor:'transparent', alignItems:'center', width:'100%'}}>
                                         <Text style={[styles.locationTitle]}>
                                             {matchQuery.data?.match.location}
                                         </Text>
-                                        <Text style={[styles.dataTitle, { paddingHorizontal:12, textAlign:'center' }]}>
+                                        <Text style={[styles.dataTitle, { paddingHorizontal:12, textAlign:'center',width:'90%'}]}>
                                             {matchQuery.data?.match.address}
                                         </Text>
                                     </DefaultView>
                                 </View>
                             </View>
+
+                            {/* Description */}
+                            {
+                                matchQuery.data?.match.description &&                                 
+                                <View style={[styles.container, { flexDirection:'column' }]}>
+                                    <View style={[styles.dataContainer, {width:'100%', backgroundColor: backgroungColor}]}>
+                                        <Text style={[styles.dataTitle, {marginBottom:10}]}>Description</Text>
+                                        <Text style={{fontSize:15, textAlign:'center', marginBottom:8}}>
+                                            {matchQuery.data?.match.description}
+                                        </Text>
+                                    </View>
+                                </View>
+                            }
 
                             {/* Date, Hour, Duration */}
                             <View style={[styles.container]}>
