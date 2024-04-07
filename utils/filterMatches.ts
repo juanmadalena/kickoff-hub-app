@@ -18,10 +18,10 @@ export const filterMatches = ( { matches, filter, group, order }: FiltersCompone
                 filteredMatches = matches;
                 break;
             case 'UPCOMING':
-                filteredMatches = matches.filter((match: any) => new Date(match.date) > new Date());
+                filteredMatches = matches.filter((match: any) => verifyDate(match.date, match.time));
                 break;
             case 'PAST':
-                filteredMatches = matches.filter((match: any) => new Date(match.date) < new Date());
+                filteredMatches = matches.filter((match: any) => !verifyDate(match.date, match.time));
                 break;
             default:
                 filteredMatches = matches;
@@ -38,4 +38,21 @@ export const filterMatches = ( { matches, filter, group, order }: FiltersCompone
     catch(e) {
         return matches;
     }
+}
+
+
+const verifyDate = (date: string, time: string): boolean => {
+    
+    const dateOffset = new Date().getTimezoneOffset() * -1;
+
+    const currentDate = new Date();
+    currentDate.setMinutes(currentDate.getMinutes() + dateOffset);
+
+    [date] = date.split('T')
+
+    const matchDate = new Date(`${date}T${time}.000Z`);
+
+    if(matchDate < currentDate) return false;
+    
+    return true;
 }
