@@ -60,7 +60,6 @@ const Match = () => {
     useEffect(() => {
         if(matchQuery.data?.match.date){
             setEndDate(calculateEndTime(matchQuery.data?.match.date!, matchQuery.data?.match.time!, matchQuery.data?.match.duration!))
-            console.log("end date", endDate, matchQuery.data?.match.date, matchQuery.data?.match.time, matchQuery.data?.match.duration)
         }
         setSwipeType( checkIfMatchIsAvailable( matchQuery.data?.match , playersQuery.data?.players, user?.id! ) );
     }, [playersQuery.data?.players, matchQuery.data?.match])

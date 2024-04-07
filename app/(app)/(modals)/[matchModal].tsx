@@ -128,11 +128,10 @@ const matchModal = () => {
         }
         catch(e){
             if(isAxiosError(e)){
-                console.log(e.response?.data.message);
                 setError(e.response?.data.message.message);
             }
         }
-        // goBack();
+        goBack();
     }
 
     return (

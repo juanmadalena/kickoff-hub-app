@@ -8,7 +8,7 @@ export function formatDateToString(date: Date | string | number, format?: format
     if(!date) return '';
 
     if(typeof date === 'string' || typeof date === 'number') date = new Date(date);
-    console.log(date);
+
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();

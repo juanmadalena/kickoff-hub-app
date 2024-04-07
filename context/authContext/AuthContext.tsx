@@ -109,7 +109,7 @@ export const AuthProvider = ({ children }:any) => {
                         payload: {message: 'Cannot connect to the server. Please try again later.'}
                     })
                 }
-                console.log(err.response.data);
+
                 return dispatch({
                     type: 'addError',
                     payload: err.response.data
