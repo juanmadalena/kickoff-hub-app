@@ -28,10 +28,8 @@ const login = () => {
 
     //Form state
     const { email, password, onChange } = useForm<loginForm>({
-        email: 'juanmadalena06@gmail.com',
-        password: '12345678' 
-        // email: '',
-        // password: '' 
+        email: '',
+        password: '' 
     });
 
     //Effect to fade in the form
