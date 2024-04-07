@@ -1,20 +1,23 @@
+import { useContext, useEffect, useRef, useState } from 'react';
+import { Keyboard, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
+
 import AddressInput from '@/components/AddressInput';
 import DateTimePicker from '@/components/DateTimePicker';
 import { View, TextInput, Text } from '@/components/Themed';
 import { AuthContext } from '@/context/authContext/AuthContext';
 import { useForm } from '@/hooks/useForm';
 import { useCreateMatch, useMatch } from '@/hooks/useMatch';
-import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useContext, useEffect, useRef, useState } from 'react';
-import { Keyboard, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
 import { formatTimeToDate } from '@/utils/formatTimeToDate';
 import TopBarNavigator from '@/components/TopBarNavigator';
 import { formatDateToString } from '@/utils/formatDateToString';
+import { isAxiosError } from 'axios';
 
 const matchModal = () => {
     const router = useRouter();
 
     const [disabled, setDisabled] = useState(false);
+    const [ error, setError ] = useState<string | undefined>(undefined);
 
     const { idMatch } = useLocalSearchParams<{ idMatch: string }>();
     const { user } = useContext(AuthContext);
@@ -26,8 +29,8 @@ const matchModal = () => {
     const location = useRef<string>('');
     const address = useRef<string>('');
 
-    const date = useRef<Date>(new Date());
-    const time = useRef<string>('00:00');
+    const date = useRef<Date>(new Date);
+    const time = useRef<string>( `${new Date().getHours().toString().padStart(2, '0')}:${new Date().getMinutes().toString().padStart(2, '0')}`);
     const duration = useRef<string>('01:00');
 
     const { matchQuery } = useMatch(idMatch ?? undefined);
@@ -83,20 +86,53 @@ const matchModal = () => {
         address.current = addressValue;
     }
 
-    const handleSubmit = () => {
-        createMatchQuery.mutateAsync({
-            idAddress: idAddress.current, 
-            idOrganizer: user?.id!, 
-            location: location.current, 
-            address: address.current,
-            time: time.current,
-            date: date.current,
-            duration: duration.current,
-            description,
-            minPlayers,
-            maxPlayers
-        });
-        goBack();
+    const handleSubmit = async () => {
+        try{
+            setError(undefined);
+            // Format date and time
+            const [ dateFormatted ] = date.current.toISOString().split('T');
+            const dateMatch = new Date( `${dateFormatted}T${time.current}:00.000Z` );
+            
+            //Get the time offset, which is the difference between the local time and UTC time in milliseconds, and multiply it by -1 to get the UTC time
+            const dateOffset = new Date().getTimezoneOffset() * 60000 * -1;
+
+            // Check if the match is in the past
+            if( dateMatch.getTime() < new Date().getTime() + dateOffset ){
+                setError('Match is in the past');
+                return;
+            }
+
+            if( duration.current === '00:00'){
+                setError('Duration must be greater than 0');
+                return;
+            }
+
+            // Check if the min players is less than the max players
+            if(minPlayers > maxPlayers){
+                setError('Min players must be less than max players');
+                return;
+            }
+
+            await createMatchQuery.mutateAsync({
+                idAddress: idAddress.current, 
+                idOrganizer: user?.id!, 
+                location: location.current, 
+                address: address.current,
+                time: time.current,
+                date: date.current,
+                duration: duration.current,
+                description,
+                minPlayers,
+                maxPlayers
+            });
+        }
+        catch(e){
+            if(isAxiosError(e)){
+                console.log(e.response?.data.message);
+                setError(e.response?.data.message.message);
+            }
+        }
+        // goBack();
     }
 
     return (
@@ -149,7 +185,7 @@ const matchModal = () => {
                     </View>
                     <View style={{ width:'23%' }}>
                         <DateTimePicker 
-                            minimumDate={ matchQuery.data?.match.date ? new Date(matchQuery.data?.match.date) : new Date()} 
+                            // minimumDate={ matchQuery.data?.match.date ? new Date(matchQuery.data?.match.date) : new Date()} 
                             value={formatTimeToDate(time.current)} 
                             type='time' 
                             placeholder='Time*' 
@@ -167,6 +203,7 @@ const matchModal = () => {
                         />
                     </View>
                 </View>
+                {error && <Text style={{fontSize:15, color:'red', textAlign:'center', marginTop:8}}>{error}</Text>}
                 </TouchableOpacity>
             </View>
         </KeyboardAvoidingView>
