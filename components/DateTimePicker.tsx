@@ -14,10 +14,11 @@ interface DateTimePickerProps {
     interval?: number
     type?: 'date' | 'time' | 'datetime' 
     DatePickerProps?: any
+    editable?: boolean
     onChangeValue?: (value: Date) => void
 }
 
-const DateTimePicker = ( { type = 'date', placeholder, minimumDate, interval = 0, value, DatePickerProps, onChangeValue }: DateTimePickerProps) => {
+const DateTimePicker = ( { type = 'date', placeholder, minimumDate, interval = 0, value, DatePickerProps, editable = true, onChangeValue }: DateTimePickerProps) => {
     
     const inputRef = useRef<DefaultTextInput>(null);
     const [ date, setDate ] = useState<Date>(value);
@@ -58,13 +59,15 @@ const DateTimePicker = ( { type = 'date', placeholder, minimumDate, interval = 0
                 containerStyle={{width:'100%'}}
                 value={formatValue(date)} 
                 placeholder={placeholder}
+                style={{ opacity: editable ? 1 : 0.4 }}
                 inputMode='none'
                 selectTextOnFocus={false}
                 selection={{start:0, end:0}}
                 onTouchStart={handleOpen}
+                editable={editable}
             />
             {
-                showDatePicker && 
+                showDatePicker && editable &&
                 (
                     <BottomModal
                         duration={300}

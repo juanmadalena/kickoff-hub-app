@@ -144,7 +144,7 @@ const Match = () => {
     return (
         <>
             <TopBarNavigator 
-                icon={ matchQuery.data?.match.organizer?.id === user?.id ? 'settings' : undefined}
+                icon={ matchQuery.data?.match.organizer?.id === user?.id && new Date() < startDateRef.current ? 'settings' : undefined}
                 iconSize={20}
                 action={() => router.navigate({pathname:'/(app)/(modals)/[matchModal]', params:{idMatch:id}})}
             />

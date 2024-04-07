@@ -7,16 +7,17 @@ import useDebouncer from '@/hooks/useDebouncer';
 import { useLocationAutocomplete } from '@/hooks/useLocationAutocomplete';
 
 interface AddressInputProps {
+    editable?: boolean;
     value: string;
     onChangeAddress: (location: string, address:string, id: string) => void;
 }
 
-const AddressInput = ( { value, onChangeAddress }: AddressInputProps ) => {
+const AddressInput = ( { value, editable = true, onChangeAddress }: AddressInputProps ) => {
 
     const [ location, setLocation ] = useState<string>(value);
     
     const [ showSuggestions, setShowSuggestions ] = useState(false)
-
+    
     const inputRef = useRef<DefaultTextInput | null>(null);
 
     const backgroundColor = useThemeColor({}, 'itemBackground');
@@ -41,13 +42,15 @@ const AddressInput = ( { value, onChangeAddress }: AddressInputProps ) => {
             <TextInput
                 innerRef={inputRef}
                 value={ location }
+                style={{ opacity: editable ? 1 : 0.4 }}
                 onChangeText={(value) => setLocation(value)}
                 placeholder="Location*"
                 selectTextOnFocus
                 onFocus={() => setShowSuggestions(true)}
+                editable={editable}
             />
             {
-                showSuggestions && data.data?.predictions && data.data?.predictions.length > 0 &&
+                showSuggestions && data.data?.predictions && data.data?.predictions.length > 0 && editable &&
                 (
                     <FlatList 
                     data={data.data?.predictions || []}
