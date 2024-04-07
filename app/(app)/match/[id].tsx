@@ -20,6 +20,7 @@ import TopBarNavigator from '@/components/TopBarNavigator';
 import ModalLoadingInfo from '@/components/ModalLoadingInfo';
 import { localNotifications } from '@/hooks/useNotifications';
 import { calculateEndTime } from '@/utils/calculateEndTime';
+import { verifyDate } from '@/utils/verifyDate';
 
 const Match = () => {
 
@@ -238,7 +239,7 @@ const Match = () => {
                                                 playersQuery.isError ?
                                                 <Text>Error loading players</Text>
                                                 :
-                                                <PlayersList players={playersQuery.data?.players} isOrganizer={user?.id === matchQuery.data.match.organizer?.id}  matchEnded={endDate! < new Date()} />
+                                                <PlayersList players={playersQuery.data?.players} isOrganizer={user?.id === matchQuery.data.match.organizer?.id}  matchEnded={!verifyDate(matchQuery.data.match.date, matchQuery.data.match.time)} />
                                             }
                                         </DefaultView>
                                     </DefaultView>

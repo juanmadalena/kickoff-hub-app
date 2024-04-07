@@ -1,6 +1,7 @@
 import { Match, showOptions, orderOptions } from '@/interfaces';
 import { groupMatchesByKey } from '@/utils/groupMatchesByKey';
 import { orderMatchesByTitle } from '@/utils/orderMatchesByTitle';
+import { verifyDate } from './verifyDate';
 
 type FiltersComponentProps = {
     matches: Match[];
@@ -38,21 +39,4 @@ export const filterMatches = ( { matches, filter, group, order }: FiltersCompone
     catch(e) {
         return matches;
     }
-}
-
-
-const verifyDate = (date: string, time: string): boolean => {
-    
-    const dateOffset = new Date().getTimezoneOffset() * -1;
-
-    const currentDate = new Date();
-    currentDate.setMinutes(currentDate.getMinutes() + dateOffset);
-
-    [date] = date.split('T')
-
-    const matchDate = new Date(`${date}T${time}.000Z`);
-
-    if(matchDate < currentDate) return false;
-    
-    return true;
 }
