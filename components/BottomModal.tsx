@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef } from 'react';
-import { Modal, StyleSheet, Animated, Dimensions, PanResponder, View as DefaultView } from 'react-native';
+import { Modal, StyleSheet, Animated, Dimensions, PanResponder, View as DefaultView, Platform } from 'react-native';
 
 import { View, useThemeColor } from '@/components/Themed';
 
@@ -76,7 +76,7 @@ const BottomModal = ( props : BottomModalProps ) =>{
     return (
         <Modal {...otherProps}>
             <View style={styles.container}>
-                <Animated.View { ...allowDragDownToClose && {...panResponder.panHandlers}} style={{...styles.bottomContainer, height: modalHeight , transform: [{translateY:translateY}], zIndex:999}}>
+                <Animated.View { ...allowDragDownToClose && Platform.OS === 'ios' && {...panResponder.panHandlers}} style={{...styles.bottomContainer, height: modalHeight , transform: [{translateY:translateY}], zIndex:999}}>
                     <View style={[{ flex:1, borderRadius:25, paddingVertical:14 },{ backgroundColor:modalBackground} ]}>
                         {
                          allowDragDownToClose &&   

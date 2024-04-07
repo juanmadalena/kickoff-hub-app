@@ -248,10 +248,9 @@ const matchModal = () => {
                         </Text>
                     }
                     {error && <Text style={{fontSize:15, color:'red', textAlign:'center', marginTop:8}}>{error}</Text>}
-
                     {
-                        idMatch &&
-                        <View style={{ position:'absolute', bottom:60, alignItems:'center', justifyContent:'center', width:'100%'}}>
+                        idMatch && Platform.OS === 'android' &&
+                        <View style={{ marginTop:'50%', alignItems:'center', justifyContent:'center', width:'100%'}}>
                             <TouchableOpacity style={{ width:'80%', paddingVertical:12, backgroundColor:'rgba(255,0,0,0.6)', borderRadius:12 }} onPress={() => setShowCancelModal(true)}>
                                 <Text style={{fontSize:16, textAlign:'center', fontWeight:'500', color:'white'}}>Cancel Match</Text>
                             </TouchableOpacity>
@@ -260,6 +259,14 @@ const matchModal = () => {
                     </TouchableOpacity>
                 </View>
             </KeyboardAvoidingView>
+                {
+                    idMatch && Platform.OS === 'ios' &&
+                    <View style={{ position:'absolute', bottom:60, alignItems:'center', justifyContent:'center', width:'100%'}}>
+                        <TouchableOpacity style={{ width:'80%', paddingVertical:12, backgroundColor:'rgba(255,0,0,0.6)', borderRadius:12 }} onPress={() => setShowCancelModal(true)}>
+                            <Text style={{fontSize:16, textAlign:'center', fontWeight:'500', color:'white'}}>Cancel Match</Text>
+                        </TouchableOpacity>
+                    </View>
+                }
             {
                 showCancelModal &&
                 <BottomModal

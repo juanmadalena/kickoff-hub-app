@@ -32,6 +32,7 @@ const register = () => {
 
     const { register, status, error, removeError } = useContext(AuthContext);
     const [ showModal, setShowModal ] = useState(false);
+    const [ showLogin, setShowLogin ] = useState(true);
     const [ loading, setLoading ] = useState(false);
     const { bottom } = useSafeAreaInsets();
 
@@ -78,6 +79,7 @@ const register = () => {
 
     const handleSelection = ( value: string ) => {
         onChange(value, 'position');
+        setShowLogin(true);
         setShowModal(false);
     }
 
@@ -89,7 +91,7 @@ const register = () => {
         <>
         {/* Logo */}
         <LogoImage />
-        <KeyboardAvoidingView style={{flex: 1, paddingHorizontal:20}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={180}>
+        <KeyboardAvoidingView style={{flex:1, paddingHorizontal:20}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={180}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss} >
                     <Animated.View style={{ ...commonStyles.innerContainer ,opacity }}>
                         {/* Title */}   
@@ -107,6 +109,8 @@ const register = () => {
                                     autoCapitalize="words"
                                     containerStyle={[styles.nameField]}
                                     value={firstName}
+                                    onFocus={() => setShowLogin(false)}
+                                    onBlur={() => setShowLogin(true)}
                                     onChangeText={ (value) => onChange(value, 'firstName')}
                                     enterKeyHint='next'
                                     autoComplete='name'
@@ -120,6 +124,8 @@ const register = () => {
                                     autoComplete='family-name'
                                     placeholder="Last Name" 
                                     autoCapitalize="words"
+                                    onFocus={() => setShowLogin(false)}
+                                    onBlur={() => setShowLogin(true)}
                                     containerStyle={[styles.nameField]}
                                     value={lastName}
                                     onChangeText={ (value) => onChange(value, 'lastName')}
@@ -139,6 +145,8 @@ const register = () => {
                                 spellCheck={false}
                                 value={email}
                                 onChangeText={ (value) => onChange(value, 'email')}
+                                onFocus={() => setShowLogin(false)}
+                                onBlur={() => setShowLogin(true)}
                                 enterKeyHint='next'
                                 innerRef={emailRef}
                                 error={error?.input === 'email'}
@@ -155,6 +163,8 @@ const register = () => {
                                 style={[ error?.input === 'password' && { borderColor: 'red' }]}
                                 value={password}
                                 onChangeText={ (value) => onChange(value, 'password')}
+                                onFocus={() => setShowLogin(false)}
+                                onBlur={() => setShowLogin(true)}
                                 innerRef={passwordRef}
                                 enterKeyHint='next'
                                 error={error?.input === 'password'}
@@ -169,7 +179,9 @@ const register = () => {
                                 editable={false}
                                 autoCorrect={ false }
                                 onTouchStart={() => Keyboard.dismiss()}
-                                onTouchEnd={() => setShowModal(true)}
+                                onTouchEnd={() => { 
+                                    setShowModal(true) 
+                                    setShowLogin(false) }}
                                 error={error?.input === 'position'}
                                 innerRef={positionRef}
                             />
@@ -197,7 +209,6 @@ const register = () => {
                                 <Text style={commonStyles.buttonText}>Create account</Text>
                             </Button>
                         </View>
-
                         {/* <View></View> */}
                     </Animated.View>
             </TouchableWithoutFeedback>
@@ -206,10 +217,12 @@ const register = () => {
         {/* Link to login */}
         {
             // Hide link when keyboard is active, because it cause some problems on android
-            !keyboardActive && (
-                <Animated.View style={{opacity, marginBottom: bottom + 20}}>
-                    <Text style={{textAlign: 'center', color: 'grey', fontSize: 16}}>Already have an account? <Text style={{color: '#005B41', fontWeight: '600'}} onPress={navigateToLogin}>Login</Text></Text>
-                </Animated.View>
+            !keyboardActive && showLogin &&(
+                <View style={{width:'100%', position: 'absolute', alignItems:'center', bottom: bottom + 20}}>
+                    <Animated.View style={{opacity}}>
+                        <Text style={{textAlign: 'center', color: 'grey', fontSize: 16}}>Already have an account? <Text style={{color: '#005B41', fontWeight: '600'}} onPress={navigateToLogin}>Login</Text></Text>
+                    </Animated.View>
+                </View>
             )
         }
         </>

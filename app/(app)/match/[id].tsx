@@ -207,21 +207,21 @@ const Match = () => {
                             <View style={[styles.container]}>
                                 <View style={[ styles.dataContainer, {height:110, width:'32%', backgroundColor: backgroungColor }]}>
                                     <Text style={[styles.dataTitle]}>Date</Text>
-                                    <Text style={[styles.dataText]} adjustsFontSizeToFit>
+                                    <Text style={[styles.dataText, {}]} adjustsFontSizeToFit numberOfLines={1}>
                                         { formatDateToString(matchQuery.data?.match.date!, 'dd/mm') }
                                     </Text>
                                     <Text></Text>
                                 </View>
                                 <View style={[styles.dataContainer, {height:110, width:'32%', backgroundColor: backgroungColor}]}>
                                     <Text style={[styles.dataTitle]}>Hour</Text>
-                                    <Text style={[styles.dataText]} adjustsFontSizeToFit>
+                                    <Text style={[styles.dataText]} adjustsFontSizeToFit numberOfLines={1}>
                                         { formatTimeDuration(matchQuery.data?.match.time!) }
                                     </Text>
                                     <Text></Text>
                                 </View>
                                 <View style={[styles.dataContainer, {height:110, width:'32%', backgroundColor: backgroungColor}]}>
                                     <Text style={[styles.dataTitle]}>Duration</Text>
-                                    <Text style={[styles.dataText]} adjustsFontSizeToFit>
+                                    <Text style={[styles.dataText]} adjustsFontSizeToFit numberOfLines={1}>
                                         { formatTimeDuration(matchQuery.data?.match.duration!) }
                                     </Text>
                                     <Text></Text>
@@ -317,9 +317,11 @@ const styles = StyleSheet.create({
         paddingVertical:8
     },
     dataText: {
+        // fontSize:120,
         fontSize:120,
-        width:'75%', 
-        height:'40%', 
+        paddingHorizontal:'20%',
+        // width:'15%', 
+        // height:'40%', 
         textAlign:'center'
     },
     dataTitle: {

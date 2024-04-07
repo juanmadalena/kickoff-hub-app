@@ -1,4 +1,4 @@
-import { TouchableOpacity, TextInput as DefaultTextInput, View as DefaultView } from 'react-native';
+import { TouchableOpacity, TextInput as DefaultTextInput, View as DefaultView, Platform } from 'react-native';
 import RNDateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { View, TextInput, useThemeColor, Text } from '@/components/Themed';
 import { useEffect, useRef, useState } from 'react';
@@ -26,6 +26,8 @@ const DateTimePicker = ( { type = 'date', placeholder, minimumDate, interval = 0
     const primaryColor = useThemeColor({}, 'primaryColor');
     const containerBackground = useThemeColor({}, 'itemBackground');
 
+    const platform = Platform.OS;
+
     useEffect(() => {
         setDate(value);
     }, [value])
@@ -40,6 +42,10 @@ const DateTimePicker = ( { type = 'date', placeholder, minimumDate, interval = 0
 
     const handleValueChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
         setDate(selectedDate!);
+        if(platform === 'android'){
+            setShowDatePicker(false);
+            onChangeValue && onChangeValue(selectedDate!);
+        }
     }
 
     const handleOpen = () => {
@@ -67,7 +73,7 @@ const DateTimePicker = ( { type = 'date', placeholder, minimumDate, interval = 0
                 editable={editable}
             />
             {
-                showDatePicker && editable &&
+                showDatePicker && editable && platform === 'ios' &&
                 (
                     <BottomModal
                         duration={300}
@@ -95,6 +101,22 @@ const DateTimePicker = ( { type = 'date', placeholder, minimumDate, interval = 0
                             />
                         </DefaultView>
                     </BottomModal>
+                )
+            }
+            {
+                showDatePicker && editable && platform === 'android' &&
+                (
+                    <RNDateTimePicker
+                        value={date} 
+                        mode={type}
+                        minimumDate={minimumDate}
+                        display={ type === 'date' ? 'inline' : 'inline'}
+                        accentColor={primaryColor}
+                        is24Hour={true}
+                        style={{ backgroundColor: containerBackground, height:'90%', padding:4}}
+                        onChange={(_event, selectedDate) => handleValueChange(_event, selectedDate)}
+                        {...DatePickerProps}
+                    />
                 )
             }
         </View>

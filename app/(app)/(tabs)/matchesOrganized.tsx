@@ -144,7 +144,7 @@ const matchesOrganized = () => {
                         </TouchableOpacity>
                     </View>
                 }
-                <DefaultView style={{position:'absolute', bottom: bottom, left:'30%', right:'30%'}} >
+                <DefaultView style={{position:'absolute', bottom: bottom == 0 ? 20 : bottom, left:'30%', right:'30%'}} >
                     <Button 
                         activeOpacity={0.8}
                         style={[styles.boxWithShadow,{alignItems:'center', justifyContent:'center', flexDirection: 'row', height:40, borderRadius:40, backgroundColor:buttonColor}]} 

@@ -68,7 +68,6 @@ const login = () => {
         <KeyboardAvoidingView style={[commonStyles.container]} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={150}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss} >
                 <Animated.View style={{...commonStyles.innerContainer, opacity}}>
-                     
                      {/* Title */}   
                     <View style={commonStyles.titleContainer}>
                         <Text style={commonStyles.title}>Welcome Back!</Text>
@@ -106,6 +105,17 @@ const login = () => {
                             {/* Error message */}
                             <Text style={{color:'red', textAlign:'center', marginTop:20}}>{error?.message ?? ' '}</Text>
 
+                            {
+                                // Hide link when keyboard is active
+                                !keyboardActive && Platform.OS === 'android' && (
+                                    <View style={{ width:'100%', alignItems:'center', marginTop:80 }}>
+                                        <Animated.View style={{opacity}}>
+                                            <Text style={{textAlign:'center', color: '#005B41', fontWeight: '600'}} onPress={navigateToRegister}>Create an account</Text>
+                                        </Animated.View>
+                                    </View>
+                                )
+                            }
+
                         </View>
                 </Animated.View>
             </TouchableWithoutFeedback>
@@ -113,10 +123,12 @@ const login = () => {
         {/* Link to login */}
         {
             // Hide link when keyboard is active
-            !keyboardActive && (
-                <Animated.View style={{opacity, marginBottom: bottom + 20}}>
-                    <Text style={{textAlign:'center', color: '#005B41', fontWeight: '600'}} onPress={navigateToRegister}>Create an account</Text>
-                </Animated.View>
+            !keyboardActive && Platform.OS === 'ios' && (
+                <View style={{ width:'100%', alignItems:'center', bottom: bottom + 20, position:'absolute' }}>
+                    <Animated.View style={{opacity}}>
+                        <Text style={{textAlign:'center', color: '#005B41', fontWeight: '600'}} onPress={navigateToRegister}>Create an account</Text>
+                    </Animated.View>
+                </View>
             )
         }
         </>
