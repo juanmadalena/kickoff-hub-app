@@ -41,8 +41,8 @@ const matchModal = () => {
 
     const { description, maxPlayers, minPlayers, onChange } = useForm({
         description: matchQuery.data?.match.description || '',
-        maxPlayers: matchQuery.data?.match.max_players || 0,
-        minPlayers: matchQuery.data?.match.min_players || 0,
+        maxPlayers: matchQuery.data?.match.max_players || '0',
+        minPlayers: matchQuery.data?.match.min_players || '0',
     });
 
     const { createMatchQuery } = useCreateMatch();
@@ -115,11 +115,17 @@ const matchModal = () => {
             }
 
             // Check if the min players is less than the max players
-            if(minPlayers > maxPlayers){
-                setError('Min players must be less than max players');
-                return;
+            if( typeof minPlayers === 'string' && typeof maxPlayers === 'string'){
+                if(parseInt(minPlayers) > parseInt(maxPlayers)){
+                    setError('Min players must be less than max players');
+                    return;
+                }else{
+                    if(parseInt(minPlayers) === 0){
+                        setError('Min players must be greater than 0');
+                        return;
+                    }
+                }
             }
-
             if( !id.current ){
                 await createMatchQuery.mutateAsync({
                     idAddress: idAddress.current, 
@@ -130,15 +136,15 @@ const matchModal = () => {
                     date: date.current,
                     duration: duration.current,
                     description,
-                    minPlayers,
-                    maxPlayers
+                    minPlayers: typeof minPlayers == 'string' ? parseInt(minPlayers) : minPlayers,
+                    maxPlayers: typeof maxPlayers == 'string' ? parseInt(maxPlayers) : maxPlayers
                 });
             }else{
                 await updateMatchQuery.mutateAsync({
                     id: id.current,
                     description,
-                    minPlayers,
-                    maxPlayers,
+                    minPlayers: typeof minPlayers == 'string' ? parseInt(minPlayers) : minPlayers,
+                    maxPlayers: typeof maxPlayers == 'string' ? parseInt(maxPlayers) : maxPlayers,
                     duration: duration.current
                 });
                 queryClient.refetchQueries({
